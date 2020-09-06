@@ -1,0 +1,42 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@master
+
+      - name: "Setup node environment"
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+        - run: npm install && npm install -g aws-cdk
+
+      - name: "Setup Go environment"
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.15
+
+      - name: "Package build files"
+        run: |
+          chmod +x ./build_package.sh
+          ./build_package.sh
+
+      - name: "Configure AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+
+      - name: "Deploy CDK app"
+        run: |
+          cd infra
+          npm install
+          cdk deploy
