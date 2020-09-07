@@ -16,7 +16,10 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
-        - run: npm install && npm install -g aws-cdk
+      - name: "Install dependencies"
+        run: |
+          npm install
+          npm install -g aws-cdk
 
       - name: "Setup Go environment"
         uses: actions/setup-go@v1
