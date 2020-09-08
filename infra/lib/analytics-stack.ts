@@ -25,14 +25,14 @@ export class AnalyticsStack extends Stack {
     /**Custom Lambda for message route key
      * It has a default managed LambdaExecutionRole policy
      */
-    const messageFunc = new Function(this, 'MessageHandler', {
+    const viewsHandler = new Function(this, 'ViewsFunction', {
       runtime: Runtime.GO_1_X,
       code: Code.fromAsset(path.join(__dirname, '../../analytics-service/message/main.zip')),
       handler: 'main',
       // role:
     });
 
-    const defaultFunc = new Function(this, 'DefaultHandler', {
+    const defaultHandler = new Function(this, 'DefaultHandler', {
         runtime: Runtime.GO_1_X,
         code: Code.fromAsset(path.join(__dirname, '../../analytics-service/default/main.zip')),
         handler: 'main',
@@ -42,8 +42,8 @@ export class AnalyticsStack extends Stack {
     const apiPolicy = new PolicyStatement({
       effect: Effect.ALLOW,
       resources: [
-        defaultFunc.functionArn,
-        messageFunc.functionArn,
+        defaultHandler.functionArn,
+        viewsHandler.functionArn,
       ],
       actions: ['lambda:InvokeFunction'],
     });
@@ -59,11 +59,11 @@ export class AnalyticsStack extends Stack {
       routeSelectionExpression: '$request.body.message',
     });
 
-    const messageIntegration = new CfnIntegration(this, 'Message-Integration', {
+    const viewsIntegration = new CfnIntegration(this, 'Message-Integration', {
       apiId: api.ref,
       integrationType: 'AWS_PROXY',
       integrationUri: 
-        `arn:aws:apigateway:${config.AWS_REGION}:lambda:path/2015-03-31/functions/${messageFunc.functionArn}/invocations`,
+        `arn:aws:apigateway:${config.AWS_REGION}:lambda:path/2015-03-31/functions/${viewsHandler.functionArn}/invocations`,
       credentialsArn: role.roleArn,
     });
 
@@ -71,21 +71,21 @@ export class AnalyticsStack extends Stack {
         apiId: api.ref,
         integrationType: 'AWS_PROXY',
         integrationUri: 
-          `arn:aws:apigateway:${config.AWS_REGION}:lambda:path/2015-03-31/functions/${defaultFunc.functionArn}/invocations`,
+          `arn:aws:apigateway:${config.AWS_REGION}:lambda:path/2015-03-31/functions/${defaultHandler.functionArn}/invocations`,
         credentialsArn: role.roleArn,
       });
 
-    const messageRoute = new CfnRoute(this, id + 'messageRoute', {
+    const viewsRoute = new CfnRoute(this, id + 'viewsRoute', {
       apiId: api.ref,
-      routeKey: 'counter',
-      target: `integrations/${messageIntegration.ref}`,
+      routeKey: 'views',
+      target: `integrations/${viewsIntegration.ref}`,
       authorizationType: 'NONE',
       routeResponseSelectionExpression: '$default'
     });
 
     new CfnRouteResponse(this, 'msgResponse', {
         apiId: api.ref,
-        routeId: messageRoute.ref,
+        routeId: viewsRoute.ref,
         routeResponseKey: '$default'
     });
 
@@ -105,7 +105,7 @@ export class AnalyticsStack extends Stack {
     
     new CfnIntegrationResponse(this, 'MessageResponse', {
       apiId: api.ref,
-      integrationId: messageIntegration.ref,
+      integrationId: viewsIntegration.ref,
       integrationResponseKey: '/200/',
     });
 
@@ -127,7 +127,7 @@ export class AnalyticsStack extends Stack {
     });
 
     const dependencies = new ConcreteDependable();
-    dependencies.add(messageRoute);
+    dependencies.add(viewsRoute);
     dependencies.add(defaultRoute);
     deployment.node.addDependency(dependencies);
   }
