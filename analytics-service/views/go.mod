@@ -1,4 +1,4 @@
-module github.com/codeama/analytics/analytics-service/message
+module github.com/codeama/analytics/analytics-service/views
 
 go 1.14
 

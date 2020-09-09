@@ -2,7 +2,7 @@
 
 service_handlers="
 analytics-service/default
-analytics-service/message
+analytics-service/views
 "
 
 # Build and package Go Lambda binaries

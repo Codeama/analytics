@@ -22,12 +22,12 @@ export class AnalyticsStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    /**Custom Lambda for message route key
+    /**Custom Lambda for views route key
      * It has a default managed LambdaExecutionRole policy
      */
     const viewsHandler = new Function(this, 'ViewsFunction', {
       runtime: Runtime.GO_1_X,
-      code: Code.fromAsset(path.join(__dirname, '../../analytics-service/message/main.zip')),
+      code: Code.fromAsset(path.join(__dirname, '../../analytics-service/views/main.zip')),
       handler: 'main',
       // role:
     });
