@@ -35,4 +35,5 @@ jobs:
       - name: "Run CDK infrastructure test"
         run: |
           cd infra
+          npm i
           npm run build && npm test

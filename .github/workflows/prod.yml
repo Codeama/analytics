@@ -32,7 +32,10 @@ jobs:
           ./build_package.sh
 
       - name: "Run CDK infrastructure test"
-        run: npm run build && npm test
+        run: |
+          cd infra
+          npm i
+          npm run build && npm test
 
       - name: "Configure AWS Credentials"
         uses: aws-actions/configure-aws-credentials@v1
