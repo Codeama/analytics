@@ -3,7 +3,7 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - master
+      - stage
 
 jobs:
   build:
@@ -42,4 +42,4 @@ jobs:
         run: |
           cd infra
           npm install
-          cdk deploy staging
+          cdk deploy stage
