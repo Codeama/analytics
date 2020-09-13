@@ -31,6 +31,12 @@ jobs:
           chmod +x ./build_package.sh
           ./build_package.sh
 
+      - name: "Run CDK infrastructure test"
+        run: |
+          cd infra
+          npm i
+          npm run build && npm test
+
       - name: "Configure AWS Credentials"
         uses: aws-actions/configure-aws-credentials@v1
         with:
