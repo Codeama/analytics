@@ -43,4 +43,4 @@ jobs:
           cd infra
           npm install
           export NAMESPACE=stage
-          cdk deploy
+          yes | cdk deploy
