@@ -1,10 +1,9 @@
-name: Build and Deploy
+name: (master) Build and deploy
 
 on:
   release:
-    branches:
-      - master
-
+    branches: [master]
+    types: [published]
 jobs:
   build:
     runs-on: ubuntu-latest
