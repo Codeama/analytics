@@ -1,7 +1,7 @@
 name: Build and Deploy
 
 on:
-  push:
+  release:
     branches:
       - master
 
@@ -42,4 +42,5 @@ jobs:
         run: |
           cd infra
           npm install
-          cdk deploy
+          export NAMESPACE=prod
+          cdk deploy  --require-approval never
