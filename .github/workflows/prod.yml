@@ -42,4 +42,5 @@ jobs:
         run: |
           cd infra
           npm install
+          export NAMESPACE=prod
           cdk deploy
