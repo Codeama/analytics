@@ -43,4 +43,4 @@ jobs:
           cd infra
           npm install
           export NAMESPACE=stage
-          yes | cdk deploy
+          cdk deploy --require-approval never
