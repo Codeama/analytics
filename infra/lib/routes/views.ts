@@ -22,7 +22,7 @@ export class Views extends Construct {
   constructor(scope: Construct, id: string, props: ViewsProps) {
     super(scope, id);
 
-    this.viewsFunc = new Function(this, "ViewsFunction", {
+    this.viewsFunc = new Function(this, "Function", {
       runtime: Runtime.GO_1_X,
       code: Code.fromAsset(
         path.join(__dirname, "../../../analytics-service/views/main.zip")
@@ -41,7 +41,7 @@ export class Views extends Construct {
       }
     );
 
-    this.route = new CfnRoute(this, id + "ViewsRoute", {
+    this.route = new CfnRoute(this, "Route", {
       apiId: props.api.ref,
       routeKey: "views",
       target: `integrations/${this.lambdaIntegration.ref}`,
@@ -49,13 +49,13 @@ export class Views extends Construct {
       routeResponseSelectionExpression: "$default",
     });
 
-    new CfnRouteResponse(this, id + "ViewsRouteResponse", {
+    new CfnRouteResponse(this, "RouteResponse", {
       apiId: props.api.ref,
       routeId: this.route.ref,
       routeResponseKey: "$default",
     });
 
-    new CfnIntegrationResponse(this, "ViewsIntegrationResponse", {
+    new CfnIntegrationResponse(this, "IntegrationResponse", {
       apiId: props.api.ref,
       integrationId: this.lambdaIntegration.ref,
       integrationResponseKey: "/200/",

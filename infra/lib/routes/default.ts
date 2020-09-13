@@ -41,7 +41,7 @@ export class Default extends Construct {
       }
     );
 
-    this.route = new CfnRoute(this, id + "DefaultRoute", {
+    this.route = new CfnRoute(this, "Route", {
       apiId: props.api.ref,
       routeKey: "$default",
       target: `integrations/${this.lambdaIntegration.ref}`,
@@ -49,13 +49,13 @@ export class Default extends Construct {
       routeResponseSelectionExpression: "$default",
     });
 
-    new CfnRouteResponse(this, id + "DefaultRouteResponse", {
+    new CfnRouteResponse(this, "RouteResponse", {
       apiId: props.api.ref,
       routeId: this.route.ref,
       routeResponseKey: "$default",
     });
 
-    new CfnIntegrationResponse(this, "DefaultIntegrationResponse", {
+    new CfnIntegrationResponse(this, "IntegrationResponse", {
       apiId: props.api.ref,
       integrationId: this.lambdaIntegration.ref,
       integrationResponseKey: "/200/",
