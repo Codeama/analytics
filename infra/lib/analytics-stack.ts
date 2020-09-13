@@ -10,15 +10,20 @@ import { Default } from './routes/default';
 import { Views } from './routes/views';
 import { lambdaPolicy } from './policy_doc';
 
+export interface AnalyticsProps extends StackProps {
+  namespace: string;
+}
 export class AnalyticsStack extends Stack {
   private role: Role;
   private api: CfnApi;
+  private namespace: string;
 
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props: AnalyticsProps) {
     super(scope, id, props);
 
+    this.namespace = props.namespace;
     this.api = new CfnApi(this, id + 'API', {
-      name: 'API',
+      name: this.namespace + 'API',
       protocolType: 'WEBSOCKET',
       routeSelectionExpression: '$request.body.message',
     });
@@ -53,7 +58,7 @@ export class AnalyticsStack extends Stack {
       apiId: this.api.ref,
       autoDeploy: true,
       deploymentId: deployment.ref,
-      stageName: 'dev',
+      stageName: this.namespace,
     });
 
     const dependencies = new ConcreteDependable();

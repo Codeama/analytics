@@ -10,4 +10,6 @@ if (!process.env.NAMESPACE) {
 const namespace = process.env.NAMESPACE as string;
 
 const app = new cdk.App();
-new AnalyticsStack(app, namespace + 'Analytics');
+new AnalyticsStack(app, namespace + 'Analytics', {
+  namespace,
+});
