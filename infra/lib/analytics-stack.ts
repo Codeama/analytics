@@ -17,6 +17,8 @@ export class AnalyticsStack extends Stack {
   private role: Role;
   private api: CfnApi;
   private namespace: string;
+  private viewsRouteKey: Views;
+  private defaultRouteKey: Default;
 
   constructor(scope: Construct, id: string, props: AnalyticsProps) {
     super(scope, id, props);
@@ -32,29 +34,32 @@ export class AnalyticsStack extends Stack {
       assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
     });
 
-    const viewsRouteKey = new Views(this, id + 'Views', {
+    this.viewsRouteKey = new Views(this, id + 'Views', {
       api: this.api,
       role: this.role,
     });
 
-    const defaultRouteKey = new Default(this, id + 'Default', {
+    this.defaultRouteKey = new Default(this, id + 'Default', {
       api: this.api,
       role: this.role,
     });
 
     const policy = lambdaPolicy([
-      viewsRouteKey.getLambdaArn(),
-      defaultRouteKey.getLambdaArn(),
+      this.viewsRouteKey.getLambdaArn(),
+      this.defaultRouteKey.getLambdaArn(),
     ]);
 
     this.role.addToPolicy(policy);
 
-    // todo CREATE deployment function:::deployApi()
-    const deployment = new CfnDeployment(this, id + 'deployment', {
+    this.createDeployment();
+  }
+
+  createDeployment = () => {
+    const deployment = new CfnDeployment(this, this.namespace + 'deployment', {
       apiId: this.api.ref,
     });
 
-    new CfnStage(this, id + 'stage', {
+    new CfnStage(this, this.namespace + 'stage', {
       apiId: this.api.ref,
       autoDeploy: true,
       deploymentId: deployment.ref,
@@ -62,8 +67,8 @@ export class AnalyticsStack extends Stack {
     });
 
     const dependencies = new ConcreteDependable();
-    dependencies.add(viewsRouteKey.getRoute());
-    dependencies.add(defaultRouteKey.getRoute());
+    dependencies.add(this.viewsRouteKey.getRoute());
+    dependencies.add(this.defaultRouteKey.getRoute());
     deployment.node.addDependency(dependencies);
-  }
+  };
 }
