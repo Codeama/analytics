@@ -8,7 +8,7 @@ import { Role, ServicePrincipal } from '@aws-cdk/aws-iam';
 import { CfnApi, CfnDeployment, CfnStage } from '@aws-cdk/aws-apigatewayv2';
 import { Default } from './routes/default';
 import { Views } from './routes/views';
-import { lambdaPolicy } from './policy_doc';
+import { lambdaPolicy } from './policies';
 
 export interface AnalyticsProps extends StackProps {
   namespace: string;
