@@ -6,10 +6,11 @@ import {
 } from '@aws-cdk/core';
 import { Role, ServicePrincipal } from '@aws-cdk/aws-iam';
 import { CfnApi, CfnDeployment, CfnStage } from '@aws-cdk/aws-apigatewayv2';
+import { Topic } from '@aws-cdk/aws-sns';
 import { Default } from './routes/default';
 import { Views } from './routes/views';
 import { lambdaPolicy } from './policies';
-
+import { QueueHandler } from './subscriber';
 export interface AnalyticsProps extends StackProps {
   namespace: string;
 }
@@ -19,11 +20,16 @@ export class AnalyticsStack extends Stack {
   private namespace: string;
   private viewsRouteKey: Views;
   private defaultRouteKey: Default;
+  private snsTopic: Topic;
 
   constructor(scope: Construct, id: string, props: AnalyticsProps) {
     super(scope, id, props);
 
     this.namespace = props.namespace;
+    this.snsTopic = new Topic(this, id + 'Topic', {
+      topicName: this.namespace + id + 'Topic',
+    });
+
     this.api = new CfnApi(this, id + 'API', {
       name: this.namespace + 'API',
       protocolType: 'WEBSOCKET',
@@ -37,6 +43,7 @@ export class AnalyticsStack extends Stack {
     this.viewsRouteKey = new Views(this, id + 'Views', {
       api: this.api,
       role: this.role,
+      topic: this.snsTopic,
     });
 
     this.defaultRouteKey = new Default(this, id + 'Default', {
@@ -52,8 +59,11 @@ export class AnalyticsStack extends Stack {
     this.role.addToPolicy(policy);
 
     this.createDeployment();
+
+    this.createQueueHandlers();
   }
 
+  // Bundles up the API resources for deployment
   createDeployment = () => {
     const deployment = new CfnDeployment(this, this.namespace + 'deployment', {
       apiId: this.api.ref,
@@ -70,5 +80,18 @@ export class AnalyticsStack extends Stack {
     dependencies.add(this.viewsRouteKey.getRoute());
     dependencies.add(this.defaultRouteKey.getRoute());
     deployment.node.addDependency(dependencies);
+  };
+
+  createQueueHandlers = () => {
+    const postHandler = new QueueHandler(this, 'post', {
+      name: 'postQueueFunc',
+      lambdaDir: './../../analytics-service/post-handler/main.zip',
+      topic: this.snsTopic,
+    });
+
+    const postSubscriber = postHandler.createSubscriptionFilters([
+      'post_views',
+    ]);
+    this.snsTopic.addSubscription(postSubscriber);
   };
 }

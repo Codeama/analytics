@@ -7,12 +7,14 @@ import {
   CfnRouteResponse,
   CfnIntegrationResponse,
 } from '@aws-cdk/aws-apigatewayv2';
-import { config } from './../config';
 import { Role } from '@aws-cdk/aws-iam';
+import { Topic } from '@aws-cdk/aws-sns';
+import { config } from './../config';
 
 interface ViewsProps {
   api: CfnRefElement;
   role: Role;
+  topic: Topic;
 }
 export class Views extends Construct {
   private viewsFunc: Function;
@@ -28,7 +30,13 @@ export class Views extends Construct {
         path.join(__dirname, '../../../analytics-service/views/main.zip')
       ),
       handler: 'main',
+      environment: {
+        TOPIC_ARN: props.topic.topicArn,
+      },
     });
+
+    // Topic permission
+    props.topic.grantPublish(this.viewsFunc);
 
     this.lambdaIntegration = new CfnIntegration(
       this,
