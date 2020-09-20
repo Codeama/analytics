@@ -3,6 +3,7 @@
 service_handlers="
 analytics-service/default
 analytics-service/views
+analytics-service/post-handler
 "
 
 # Build and package Go Lambda binaries
