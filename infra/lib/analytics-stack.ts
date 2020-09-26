@@ -40,13 +40,13 @@ export class AnalyticsStack extends Stack {
       assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
     });
 
-    this.viewsRouteKey = new Views(this, id + 'Views', {
+    this.viewsRouteKey = new Views(this, 'Views', {
       api: this.api,
       role: this.role,
       topic: this.snsTopic,
     });
 
-    this.defaultRouteKey = new Default(this, id + 'Default', {
+    this.defaultRouteKey = new Default(this, 'Default', {
       api: this.api,
       role: this.role,
     });

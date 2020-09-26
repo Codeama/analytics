@@ -18,7 +18,7 @@ export class QueueHandler extends Construct {
   constructor(scope: Construct, id: string, props: HandlerProps) {
     super(scope, id);
     // TODO increase lambda timeout
-    this.subscribeFunc = new Function(this, id + 'Subscriber', {
+    this.subscribeFunc = new Function(this, 'Subscriber', {
       runtime: Runtime.GO_1_X,
       code: Code.fromAsset(path.join(__dirname, props.lambdaDir)),
       handler: 'main',
@@ -28,7 +28,7 @@ export class QueueHandler extends Construct {
       },
     });
 
-    this.queue = new Queue(this, id + 'Queue', {
+    this.queue = new Queue(this, 'Queue', {
       queueName: id + 'Queue',
     });
 
