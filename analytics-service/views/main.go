@@ -12,7 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sns"
-	"github.com/codeama/analytics/analytics-service/views/processing"
+	"github.com/codeama/analytics/analytics-service/views/tags"
 )
 
 // IncomingData represents data event received
@@ -38,7 +38,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayWebsocketProxyR
 
 	fmt.Println("Incoming event:", string(result))
 
-	var forwardData processing.ViewData
+	var forwardData tags.ViewData
 	forwardData.ArticleID = data.ArticleID
 	forwardData.ArticleTitle = data.ArticleTitle
 	forwardData.PreviousPage = data.PreviousPage
@@ -46,7 +46,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayWebsocketProxyR
 	forwardData.ConnectionID = request.RequestContext.ConnectionID
 
 	// // Process data
-	translatedData, _ := processing.TranslateData(forwardData)
+	translatedData, _ := tags.TranslateData(forwardData)
 
 	// // Marshal data
 	processedData, _ := json.Marshal(translatedData)

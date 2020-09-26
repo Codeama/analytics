@@ -27,7 +27,7 @@ export class Views extends Construct {
     this.viewsFunc = new Function(this, 'Function', {
       runtime: Runtime.GO_1_X,
       code: Code.fromAsset(
-        path.join(__dirname, '../../../analytics-service/views/main.zip')
+        path.join(__dirname, '../../../analytics-service/views/dist/main.zip')
       ),
       handler: 'main',
       environment: {

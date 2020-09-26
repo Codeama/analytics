@@ -85,7 +85,7 @@ export class AnalyticsStack extends Stack {
   createQueueHandlers = () => {
     const postHandler = new QueueHandler(this, 'post', {
       name: 'postQueueFunc',
-      lambdaDir: './../../analytics-service/post-handler/main.zip',
+      lambdaDir: './../../analytics-service/post-handler/dist/main.zip',
       topic: this.snsTopic,
     });
 
