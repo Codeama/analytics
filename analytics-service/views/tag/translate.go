@@ -1,5 +1,5 @@
-// Package tags tags received events
-package tags
+// Package tag tags received events
+package tag
 
 import (
 	"fmt"

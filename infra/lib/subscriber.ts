@@ -28,7 +28,7 @@ export class QueueHandler extends Construct {
       },
     });
 
-    this.queue = new Queue(this, 'Queue', {
+    this.queue = new Queue(this, id + 'Queue', {
       queueName: id + 'Queue',
     });
 
