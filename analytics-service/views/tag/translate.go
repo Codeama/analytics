@@ -23,6 +23,18 @@ type ProcessedData struct {
 	ConnectionID string
 }
 
+type ProfileData struct {
+	Page    string
+	Event        string
+	ConnectionID string
+}
+
+type Data Interface {
+	getPostData() ProcessedData
+	getProfileData() ProfileData
+}
+
+// todo Interface?
 func tag(data ViewData, eventTag string) (ProcessedData, error) {
 	return ProcessedData{
 		ArticleID:    data.ArticleID,
@@ -32,6 +44,7 @@ func tag(data ViewData, eventTag string) (ProcessedData, error) {
 	}, nil
 }
 
+//todo consider processing data differently for profile_view
 // TranslateData processes and tags events received
 func TranslateData(data ViewData) (ProcessedData, error) {
 	currentURL := data.CurrentPage
