@@ -31,3 +31,4 @@ Each SQS queue has a corresponding Lambda function which processes messages from
   Set your AWS profile using the AWS CLI
   Set your stack namespace: `export NAMESPACE=my-stack`
   From the root of this project run the script: `./build_packages.sh`
+  Then run `./deploy.sh` to deploy to your personal AWS account
