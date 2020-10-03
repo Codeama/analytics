@@ -89,9 +89,18 @@ export class AnalyticsStack extends Stack {
       topic: this.snsTopic,
     });
 
-    const postSubscriber = postHandler.createSubscriptionFilters([
-      'post_views',
-    ]);
+    const postSubscriber = postHandler.createSubscriptionFilters(['post_view']);
     this.snsTopic.addSubscription(postSubscriber);
+
+    const profileHandler = new QueueHandler(this, 'profile', {
+      name: 'profileQueueFunc',
+      lambdaDir: './../../analytics-service/profile-handler/dist/main.zip',
+      topic: this.snsTopic,
+    });
+
+    const profileSubscriber = profileHandler.createSubscriptionFilters([
+      'profile_view',
+    ]);
+    this.snsTopic.addSubscription(profileSubscriber);
   };
 }
