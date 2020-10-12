@@ -83,8 +83,9 @@ export class AnalyticsStack extends Stack {
   };
 
   createQueueHandlers = () => {
+    // POST
     const postHandler = new QueueHandler(this, 'post', {
-      name: 'postQueueFunc',
+      name: this.namespace + 'postQueueFunc',
       lambdaDir: './../../analytics-service/post-handler/dist/main.zip',
       topic: this.snsTopic,
     });
@@ -92,8 +93,9 @@ export class AnalyticsStack extends Stack {
     const postSubscriber = postHandler.createSubscriptionFilters(['post_view']);
     this.snsTopic.addSubscription(postSubscriber);
 
+    // PROFILE
     const profileHandler = new QueueHandler(this, 'profile', {
-      name: 'profileQueueFunc',
+      name: this.namespace + 'profileQueueFunc',
       lambdaDir: './../../analytics-service/profile-handler/dist/main.zip',
       topic: this.snsTopic,
     });
