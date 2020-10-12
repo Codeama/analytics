@@ -36,14 +36,17 @@ func publish(eventType string, data string) {
 }
 
 // SendEvent publishes events to SNS
-func SendEvent(event string, data string) {
-	switch event {
+func SendEvent(tagName string, data string) {
+	switch tagName {
 	case "post_view":
 		publish("post_view", data)
 	case "contact_view":
 		publish("profile_view", data)
 	case "about_view":
 		publish("profile_view", data)
+	case "homepage_view":
+		// publish("homepage_view", data)
+		fmt.Println("HOMEPAGE VIEW", data)
 	default:
 		fmt.Println("What is this data?", data)
 		// publish("raw_data", data)

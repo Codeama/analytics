@@ -8,14 +8,14 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/codeama/analytics/analytics-service/views/process"
 	"github.com/codeama/analytics/analytics-service/views/publish"
-	"github.com/codeama/analytics/analytics-service/views/tag"
 )
 
 // IncomingData represents data event received
 type IncomingData struct {
-	ArticleID    string `json:"articleId"`
-	ArticleTitle string `json:"articleTitle"`
+	ArticleID    string `json:"articleId,omitempty"`
+	ArticleTitle string `json:"articleTitle,omitempty"`
 	PreviousPage string `json:"previousPage"`
 	CurrentPage  string `json:"currentPage"`
 }
@@ -33,20 +33,26 @@ func handleRequest(ctx context.Context, request events.APIGatewayWebsocketProxyR
 
 	fmt.Println("Incoming event:", string(result))
 
-	var forwardData tag.ViewData
-	forwardData.ArticleID = data.ArticleID
-	forwardData.ArticleTitle = data.ArticleTitle
-	forwardData.PreviousPage = data.PreviousPage
-	forwardData.CurrentPage = data.CurrentPage
-	forwardData.ConnectionID = request.RequestContext.ConnectionID
+	// turn to a func that returns unknown interface
+	var received process.ReceivedData
+	received.ArticleID = data.ArticleID
+	received.ArticleTitle = data.ArticleTitle
+	received.PreviousPage = data.PreviousPage
+	received.CurrentPage = data.CurrentPage
+	received.ConnectionID = request.RequestContext.ConnectionID
 
-	taggedData, _ := tag.TranslateData(forwardData)
+	filtered := process.FilterData(received)
 
-	processedData, _ := json.Marshal(taggedData)
+	eventType, taggedData := process.Sort(filtered)
 
-	fmt.Println("Processed data:", string(processedData))
+	fmt.Printf("Tagged data: %v", taggedData)
+
+	// processedData, _ := json.Marshal(taggedData)
+
+	// fmt.Println("Processed data:", string(processedData))
 	// publish to SNS
-	publish.SendEvent(string(taggedData.Event), string(processedData))
+	// TODO check args are not empty strings???
+	publish.SendEvent(eventType, taggedData)
 
 	return events.APIGatewayProxyResponse{
 		Body:       string(fmt.Sprintf("New lambda: User %s connected!", request.RequestContext.ConnectionID)),
