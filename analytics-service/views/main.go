@@ -21,7 +21,7 @@ type IncomingData struct {
 }
 
 func handleRequest(ctx context.Context, request events.APIGatewayWebsocketProxyRequest) (events.APIGatewayProxyResponse, error) {
-	// todo Send raw events to SNS
+	// TODO Send raw events to SNS
 	// todo Send tagged event to SNS
 	var data IncomingData
 	err := json.Unmarshal([]byte(request.Body), &data)
@@ -29,11 +29,11 @@ func handleRequest(ctx context.Context, request events.APIGatewayWebsocketProxyR
 		return events.APIGatewayProxyResponse{}, nil
 	}
 
-	result, _ := json.Marshal(data)
+	forLogging, _ := json.Marshal(data)
 
-	fmt.Println("Incoming event:", string(result))
+	fmt.Println("Incoming event:", string(forLogging))
 
-	// turn to a func that returns unknown interface
+	// put received data in a struct
 	var received process.ReceivedData
 	received.ArticleID = data.ArticleID
 	received.ArticleTitle = data.ArticleTitle
@@ -47,11 +47,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayWebsocketProxyR
 
 	fmt.Printf("Tagged data: %v", taggedData)
 
-	// processedData, _ := json.Marshal(taggedData)
-
-	// fmt.Println("Processed data:", string(processedData))
 	// publish to SNS
-	// TODO check args are not empty strings???
 	publish.SendEvent(eventType, taggedData)
 
 	return events.APIGatewayProxyResponse{
