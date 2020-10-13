@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - stage
+      - master # triggered on merge to master
 
 jobs:
   build:
