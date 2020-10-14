@@ -26,8 +26,16 @@ type Article struct {
 	Page
 }
 
-// ReceivedData represents input data expected
-type ReceivedData struct {
+// IncomingData represents data event received
+type IncomingData struct {
+	ArticleID    string `json:"articleId,omitempty"`
+	ArticleTitle string `json:"articleTitle,omitempty"`
+	PreviousPage string `json:"previousPage"`
+	CurrentPage  string `json:"currentPage"`
+}
+
+// AnalyticsData represents input data expected
+type AnalyticsData struct {
 	ArticleID    string
 	ArticleTitle string
 	PreviousPage string
@@ -35,11 +43,34 @@ type ReceivedData struct {
 	ConnectionID string
 }
 
+// ValidateData validates and stores incoming data in an struct
+func ValidateData(data IncomingData, id string) (AnalyticsData, error) {
+	// check connectionId isn't empty
+	if id == "" {
+		return AnalyticsData{}, fmt.Errorf("No ConnectionId from request")
+	}
+
+	// check there are at least members of Page struct
+	if data.CurrentPage == "" || data.PreviousPage == "" {
+		return AnalyticsData{}, fmt.Errorf("Event does not contain page data")
+	}
+
+	// return received data in a digestable struct
+	return AnalyticsData{
+		data.ArticleID,
+		data.ArticleTitle,
+		data.PreviousPage,
+		data.CurrentPage,
+		id,
+	}, nil
+
+}
+
 // FilterData filters incoming json data into the right struct
 // and returns the corresponding struct as an interface of Event
 // for further processing by Sort func
-func FilterData(data ReceivedData) Event {
-	if data.ArticleID == "" && data.ArticleTitle == "" {
+func FilterData(data AnalyticsData) Event {
+	if data.ArticleID == "" || data.ArticleTitle == "" {
 		var page Page
 		page.ConnectionID = data.ConnectionID
 		page.PreviousPage = data.PreviousPage
@@ -133,7 +164,7 @@ func Sort(data Event) (string, string) {
 			return tag, string(pageData)
 		}
 	default:
-		fmt.Printf("Cannot process unknow data type %v", data)
+		fmt.Printf("Cannot process unknown data type %v", data)
 	}
 	return "", ""
 }

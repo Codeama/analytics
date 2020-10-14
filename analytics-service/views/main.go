@@ -12,39 +12,26 @@ import (
 	"github.com/codeama/analytics/analytics-service/views/publish"
 )
 
-// IncomingData represents data event received
-type IncomingData struct {
-	ArticleID    string `json:"articleId,omitempty"`
-	ArticleTitle string `json:"articleTitle,omitempty"`
-	PreviousPage string `json:"previousPage"`
-	CurrentPage  string `json:"currentPage"`
-}
-
 func handleRequest(ctx context.Context, request events.APIGatewayWebsocketProxyRequest) (events.APIGatewayProxyResponse, error) {
+	fmt.Println("Incoming event:", string(request.Body))
 	// TODO Send raw events to SNS
 	// todo Send tagged event to SNS
-	var data IncomingData
-	err := json.Unmarshal([]byte(request.Body), &data)
+	var data process.IncomingData
+	if err := json.Unmarshal([]byte(request.Body), &data); err != nil {
+		return events.APIGatewayProxyResponse{}, nil
+	}
+
+	// validate
+	validated, err := process.ValidateData(data, request.RequestContext.ConnectionID)
 	if err != nil {
 		return events.APIGatewayProxyResponse{}, nil
 	}
 
-	forLogging, _ := json.Marshal(data)
+	// filter
+	event := process.FilterData(validated)
 
-	fmt.Println("Incoming event:", string(forLogging))
-
-	// put received data in a struct
-	var received process.ReceivedData
-	received.ArticleID = data.ArticleID
-	received.ArticleTitle = data.ArticleTitle
-	received.PreviousPage = data.PreviousPage
-	received.CurrentPage = data.CurrentPage
-	received.ConnectionID = request.RequestContext.ConnectionID
-
-	filtered := process.FilterData(received)
-
-	eventType, taggedData := process.Sort(filtered)
-
+	// process and tag
+	eventType, taggedData := process.Sort(event)
 	fmt.Printf("Tagged data: %v", taggedData)
 
 	// publish to SNS
