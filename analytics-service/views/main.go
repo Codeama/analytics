@@ -31,7 +31,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayWebsocketProxyR
 	event := process.FilterData(validated)
 
 	// process and tag
-	eventType, taggedData := process.Sort(event)
+	eventType, taggedData, _ := process.Sort(event)
 	fmt.Printf("Tagged data: %v", taggedData)
 
 	// publish to SNS

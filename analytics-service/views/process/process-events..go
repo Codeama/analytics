@@ -128,7 +128,7 @@ func (data Article) tagEvent(eventTag string) (string, string) {
 // Sort processes and tags received events for publishing to SNS
 // Identifies page url, tags it, marshals it and
 // returns the tag and json data (eventTag, data)
-func Sort(data Event) (string, string) {
+func Sort(data Event) (string, string, error) {
 	switch data.(type) {
 	case Page:
 		currentURL := data.(Page).CurrentPage
@@ -137,23 +137,22 @@ func Sort(data Event) (string, string) {
 		home, _ := regexp.MatchString("\\/", currentURL)
 
 		if !contact && !about && !home {
-			fmt.Printf("Unrecognised URL from data received: %v \n", currentURL)
-			fmt.Printf("Malformed data received: %v", data)
+			return "", "", fmt.Errorf("Unrecognised URL %v.\n Data received: %v", currentURL, data)
 		}
 
 		if about {
 			tag, pageData := data.tagEvent("about_view")
-			return tag, string(pageData)
+			return tag, string(pageData), nil
 		}
 
 		if home {
 			tag, pageData := data.tagEvent("homepage_view")
-			return tag, string(pageData)
+			return tag, string(pageData), nil
 		}
 
 		if contact {
 			tag, pageData := data.tagEvent("contact_view")
-			return tag, string(pageData)
+			return tag, string(pageData), nil
 		}
 
 	case Article:
@@ -161,10 +160,10 @@ func Sort(data Event) (string, string) {
 		post, _ := regexp.MatchString("\\/posts\\/", currentURL)
 		if post {
 			tag, pageData := data.tagEvent("post_view")
-			return tag, string(pageData)
+			return tag, string(pageData), nil
 		}
 	default:
 		fmt.Printf("Cannot process unknown data type %v", data)
 	}
-	return "", ""
+	return "", "", nil
 }
