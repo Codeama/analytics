@@ -1,6 +1,10 @@
 package process
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 var jsonArticleMock = `{
 	"articleId":"123testId",
@@ -9,34 +13,30 @@ var jsonArticleMock = `{
 	"currentPage": "/posts/unit-testing-go-functions"
 	}`
 
-var mockArticleData = ReceivedData{
+var mockArticleData = AnalyticsData{
 	ArticleID:    "123testId",
 	ArticleTitle: "Unit Testing Go Functions",
 	PreviousPage: "/",
 	CurrentPage:  "/posts/unit-testing-go-functions",
 }
 
-var mockPageData = ReceivedData{
+var mockPageData = AnalyticsData{
 	PreviousPage: "null",
 	CurrentPage:  "/",
 }
 
 func TestFilterDataArticle(t *testing.T) {
-	// test it returns an Article struct
 	result := FilterData(mockArticleData)
-	if result != result.(Event) {
-		t.Errorf("Expected result to be type %T, but received %T", mockArticleData, result)
-	}
+	assert.Equal(t, result, result.(Event), "Article should be of type Event")
 
 }
 
 func TestFilterDataPage(t *testing.T) {
-	// test it returns a Page struct
 	result := FilterData(mockPageData)
-	if result != result.(Event) {
-		t.Errorf("Expected result to be type %T, but received %T", mockPageData, result)
-	}
+	assert.Equal(t, result, result.(Event), "Page should be of type Event")
 
 }
 
-func TestSort(t *testing.T) {}
+func TestSort(t *testing.T) {
+
+}
