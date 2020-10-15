@@ -52,7 +52,7 @@ func ValidateData(data IncomingData, id string) (AnalyticsData, error) {
 
 	// check there are at least members of Page struct
 	if data.CurrentPage == "" || data.PreviousPage == "" {
-		return AnalyticsData{}, fmt.Errorf("Event does not contain page data")
+		return AnalyticsData{}, fmt.Errorf("Event does not contain required page data")
 	}
 
 	// return received data in a digestable struct

@@ -63,6 +63,42 @@ var mockArticlePageError = Article{
 	},
 }
 
+var incomingData = IncomingData{
+	PreviousPage: "/mypage",
+	CurrentPage:  "/posts/hello-world",
+}
+
+var incomingNoPageData = IncomingData{
+	PreviousPage: "",
+	CurrentPage:  "/posts/hello-world",
+}
+
+func TestValidateData(t *testing.T) {
+	id := "testId"
+	var mockResult = AnalyticsData{
+		"",
+		"",
+		incomingData.PreviousPage,
+		incomingData.CurrentPage,
+		id,
+	}
+	data, err := ValidateData(incomingData, id)
+	assert.Equal(t, mockResult, data, "It should return AnalyticsData struct")
+	assert.Equal(t, err, nil, "Error should be nil value")
+}
+
+func TestInValidData(t *testing.T) {
+	data, err := ValidateData(incomingData, "")
+	assert.Equal(t, AnalyticsData{}, data, "It should return empty AnalyticsData value")
+	assert.NotNil(t, err, "It should return an error")
+}
+
+func TestInValidNoPageData(t *testing.T) {
+	data, err := ValidateData(incomingNoPageData, "testId")
+	assert.Equal(t, AnalyticsData{}, data, "It should return empty AnalyticsData value")
+	assert.NotNil(t, err, "It should return an error")
+}
+
 func TestFilterDataArticle(t *testing.T) {
 	result := FilterData(mockArticleData)
 	assert.Equal(t, result.(Event), result, "Article should be of type Event")
