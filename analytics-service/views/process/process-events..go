@@ -132,9 +132,11 @@ func Sort(data Event) (string, string, error) {
 	switch data.(type) {
 	case Page:
 		currentURL := data.(Page).CurrentPage
-		contact, _ := regexp.MatchString("\\/pages\\/contacts", currentURL)
-		about, _ := regexp.MatchString("\\/pages\\/about", currentURL)
-		home, _ := regexp.MatchString("\\/", currentURL)
+		contact := currentURL == "/pages/contacts"
+		about := currentURL == "/pages/about"
+		// contact, _ := regexp.MatchString("\\/pages\\/contacts", currentURL)
+		// about, _ := regexp.MatchString("\\/pages\\/about", currentURL)
+		home := currentURL == "/"
 
 		if !contact && !about && !home {
 			return "", "", fmt.Errorf("Unrecognised URL %v.\n Data received: %v", currentURL, data)
@@ -162,6 +164,8 @@ func Sort(data Event) (string, string, error) {
 			tag, pageData := data.tagEvent("post_view")
 			return tag, string(pageData), nil
 		}
+		return "", "", fmt.Errorf("Unrecognised URL %v.\n Data received: %v", currentURL, data)
+
 	default:
 		fmt.Printf("Cannot process unknown data type %v", data)
 	}
