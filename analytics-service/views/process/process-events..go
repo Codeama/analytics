@@ -134,13 +134,7 @@ func Sort(data Event) (string, string, error) {
 		currentURL := data.(Page).CurrentPage
 		contact := currentURL == "/pages/contacts"
 		about := currentURL == "/pages/about"
-		// contact, _ := regexp.MatchString("\\/pages\\/contacts", currentURL)
-		// about, _ := regexp.MatchString("\\/pages\\/about", currentURL)
 		home := currentURL == "/"
-
-		if !contact && !about && !home {
-			return "", "", fmt.Errorf("Unrecognised URL %v.\n Data received: %v", currentURL, data)
-		}
 
 		if about {
 			tag, pageData := data.tagEvent("about_view")
@@ -156,6 +150,8 @@ func Sort(data Event) (string, string, error) {
 			tag, pageData := data.tagEvent("contact_view")
 			return tag, string(pageData), nil
 		}
+
+		return "", "", fmt.Errorf("Unrecognised URL %v.\n Data received: %v", currentURL, data)
 
 	case Article:
 		currentURL := data.(Article).CurrentPage
