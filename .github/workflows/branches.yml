@@ -32,8 +32,7 @@ jobs:
           chmod +x ./build_package.sh
           ./build_package.sh
 
-      - name: "Run CDK infrastructure test"
+      - name: "Run lambda unit tests"
         run: |
-          cd infra
-          npm i
-          npm run build && npm test
+          chmod +x ./test.sh
+          ./test.sh
