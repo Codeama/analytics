@@ -83,6 +83,18 @@ export class AnalyticsStack extends Stack {
   };
 
   createQueueHandlers = () => {
+    // HOME
+    const homeHandler = new QueueHandler(this, this.namespace + 'homepage', {
+      name: this.namespace + 'homeQueueFunc',
+      lambdaDir: './../../analytics-service/home-handler/dist/main.zip',
+      topic: this.snsTopic,
+    });
+
+    const homeSubscriber = homeHandler.createSubscriptionFilters([
+      'homepage_view',
+    ]);
+    this.snsTopic.addSubscription(homeSubscriber);
+
     // POST
     const postHandler = new QueueHandler(this, this.namespace + 'post', {
       name: this.namespace + 'postQueueFunc',
