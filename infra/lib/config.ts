@@ -1,3 +1,3 @@
 export const config = {
-  AWS_REGION: process.env.AWS_DEFAULT_REGION,
+  AWS_REGION: process.env.CDK_DEFAULT_REGION,
 };
