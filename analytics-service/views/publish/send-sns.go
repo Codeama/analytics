@@ -10,7 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/sns"
 )
 
-type AttributeValue map[string]*sns.MessageAttributeValue
+type attributeValue map[string]*sns.MessageAttributeValue
 
 func publish(eventType string, data string) {
 	sess, err := session.NewSession(&aws.Config{
@@ -19,7 +19,7 @@ func publish(eventType string, data string) {
 	client := sns.New(sess)
 	input := &sns.PublishInput{
 		Message: aws.String(data),
-		MessageAttributes: AttributeValue{
+		MessageAttributes: attributeValue{
 			"event_type": {
 				DataType:    aws.String("String"),
 				StringValue: aws.String(eventType),
@@ -45,11 +45,9 @@ func SendEvent(tagName string, data string) {
 	case "about_view":
 		publish("profile_view", data)
 	case "homepage_view":
-		// publish("homepage_view", data)
-		fmt.Println("HOMEPAGE VIEW", data)
+		publish("homepage_view", data)
 	default:
-		fmt.Println("What is this data?", data)
-		// publish("raw_data", data)
+		fmt.Println("UNKNOWN DATA:", data)
 	}
 
 }
