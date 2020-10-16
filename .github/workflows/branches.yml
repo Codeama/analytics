@@ -32,7 +32,7 @@ jobs:
           chmod +x ./test.sh
           ./test.sh
 
-      - name: "Package build files"
+      - name: "Build and package lambdas"
         run: |
           chmod +x ./build_package.sh
           ./build_package.sh
