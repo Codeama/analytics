@@ -1,4 +1,9 @@
-// websocket lambda
+// Views lambda is both the websocket connection backend
+// that receives data from the website and
+// the initial data processing 'frontend'
+// for events sent from the blog website
+// The aim is to shift data processing logic away from the website
+// to avoid load on performance
 package main
 
 import (
@@ -14,8 +19,6 @@ import (
 
 func handleRequest(ctx context.Context, request events.APIGatewayWebsocketProxyRequest) (events.APIGatewayProxyResponse, error) {
 	fmt.Println("Incoming event:", string(request.Body))
-	// TODO Send raw events to SNS
-	// todo Send tagged event to SNS
 	var data process.IncomingData
 	if err := json.Unmarshal([]byte(request.Body), &data); err != nil {
 		return events.APIGatewayProxyResponse{}, nil
