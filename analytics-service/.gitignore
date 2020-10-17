@@ -2,3 +2,5 @@
 /main
 *.zip
 dist/
+coverage.html
+c.out
