@@ -161,9 +161,6 @@ func Sort(data Event) (string, string, error) {
 			return tag, string(pageData), nil
 		}
 		return "", "", fmt.Errorf("Unrecognised URL %v.\n Data received: %v", currentURL, data)
-
-	default:
-		fmt.Printf("Cannot process unknown data type %v", data)
 	}
-	return "", "", nil
+	return "", "", fmt.Errorf("Unknown event %v", data)
 }

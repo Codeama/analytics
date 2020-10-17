@@ -59,7 +59,7 @@ var mockArticlePageError = Article{
 	ArticleTitle: "Random Title",
 	Page: Page{
 		PreviousPage: "/",
-		CurrentPage:  "/posts/",
+		CurrentPage:  "/about-me",
 	},
 }
 
@@ -147,8 +147,24 @@ func TestSortPageError(t *testing.T) {
 }
 
 func TestSortArticleError(t *testing.T) {
-	tag, data, err := Sort(mockPageDataError)
+	tag, data, err := Sort(mockArticlePageError)
 	assert.Equal(t, "", tag, "There should be no tag")
 	assert.Equal(t, "", data, "There should be no data")
 	assert.NotNil(t, err, "There should be an error")
+}
+
+type mockEventType struct {
+	testPage string
+}
+
+func (mockedData mockEventType) tagEvent(tag string) (string, string) {
+	return "test_tag", "testData"
+}
+
+func TestUnknownEventType(t *testing.T) {
+	mockData := mockEventType{"hello-world-page"}
+	tag, data, err := Sort(mockData)
+	assert.Equal(t, "", tag, "It  should return an empty string tag")
+	assert.Equal(t, "", data, "It should return an empty string data")
+	assert.NotNil(t, err, "It should retrun an error value")
 }
