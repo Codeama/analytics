@@ -1,4 +1,4 @@
-// Package publish adds appropriate event type and sends to SNS
+// Package publish adds event filter and ToSNSs to SNS
 package publish
 
 import (
@@ -6,18 +6,26 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sns"
+	"github.com/aws/aws-sdk-go/service/sns/snsiface"
 )
 
 type attributeValue map[string]*sns.MessageAttributeValue
 
-func publish(eventType string, data string) {
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("eu-west-1"),
-	})
-	client := sns.New(sess)
-	input := &sns.PublishInput{
+// AWSSNS is a custom interface for method
+// that filters and publishes events to AWS SNS
+type AWSSNS interface {
+	SendEvent(string) error
+}
+
+// Tag represents the tag for the data
+// This is used to ToSNS data with the right filter to SNS
+type Tag struct {
+	Name string
+}
+
+func createMessage(eventType string, data string) *sns.PublishInput {
+	return &sns.PublishInput{
 		Message: aws.String(data),
 		MessageAttributes: attributeValue{
 			"event_type": {
@@ -27,27 +35,39 @@ func publish(eventType string, data string) {
 		},
 		TopicArn: aws.String(os.Getenv("TOPIC_ARN")),
 	}
-
-	_, err = client.Publish(input)
-	if err != nil {
-		fmt.Println("Publish error:", err)
-		return
-	}
 }
 
-// SendEvent publishes events to SNS
-func SendEvent(tagName string, data string) {
-	switch tagName {
-	case "post_view":
-		publish("post_view", data)
-	case "contact_view":
-		publish("profile_view", data)
-	case "about_view":
-		publish("profile_view", data)
+// SendEvent implements SSNService interface
+// SNS interface (snsiface.SNSAPI) is used here to allow for easy testing and loose coupling
+// See here: https://github.com/aws/aws-sdk-go/blob/master/service/sns/snsiface/interface.go
+func (tag *Tag) SendEvent(snsClient snsiface.SNSAPI, data string) error {
+	switch tag.Name {
 	case "homepage_view":
-		publish("homepage_view", data)
+		input := createMessage("homepage_view", data)
+		_, err := snsClient.Publish(input)
+		if err != nil {
+			return fmt.Errorf("Unable to publish %v", tag)
+		}
+	case "post_view":
+		input := createMessage("post_view", data)
+		_, err := snsClient.Publish(input)
+		if err != nil {
+			return fmt.Errorf("Unable to publish %v", tag)
+		}
+	case "contact_view":
+		input := createMessage("profile_view", data)
+		_, err := snsClient.Publish(input)
+		if err != nil {
+			return fmt.Errorf("Unable to publish %v", tag)
+		}
+	case "about_view":
+		input := createMessage("profile_view", data)
+		_, err := snsClient.Publish(input)
+		if err != nil {
+			return fmt.Errorf("Unable to publish %v", tag)
+		}
 	default:
-		fmt.Println("UNKNOWN DATA:", data)
+		return fmt.Errorf("Cannot publish data %v", data)
 	}
-
+	return nil
 }
