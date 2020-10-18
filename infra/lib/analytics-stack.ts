@@ -11,6 +11,7 @@ import { Default } from './routes/default';
 import { Views } from './routes/views';
 import { lambdaPolicy } from './policies';
 import { QueueHandler } from './subscriber';
+import { config } from './config';
 export interface AnalyticsProps extends StackProps {
   namespace: string;
 }
@@ -44,6 +45,7 @@ export class AnalyticsStack extends Stack {
       api: this.api,
       role: this.role,
       topic: this.snsTopic,
+      topicRegion: config.AWS_REGION as string,
     });
 
     this.defaultRouteKey = new Default(this, 'Default', {

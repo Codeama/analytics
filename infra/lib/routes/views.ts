@@ -15,6 +15,7 @@ interface ViewsProps {
   api: CfnRefElement;
   role: Role;
   topic: Topic;
+  topicRegion: string;
 }
 export class Views extends Construct {
   private viewsFunc: Function;
@@ -32,6 +33,7 @@ export class Views extends Construct {
       handler: 'main',
       environment: {
         TOPIC_ARN: props.topic.topicArn,
+        TOPIC_REGION: props.topicRegion,
       },
     });
 
