@@ -1,4 +1,5 @@
-// Package publish adds event filter and ToSNSs to SNS
+// Package publish contains methods that
+// process and send events to SNS
 package publish
 
 import (
@@ -41,30 +42,31 @@ func createMessage(eventType string, data string) *sns.PublishInput {
 // SNS interface (snsiface.SNSAPI) is used here to allow for easy testing and loose coupling
 // See here: https://github.com/aws/aws-sdk-go/blob/master/service/sns/snsiface/interface.go
 func (tag *Tag) SendEvent(snsClient snsiface.SNSAPI, data string) error {
+	var errorMessage = fmt.Errorf("Unable to publish %v", tag)
 	switch tag.Name {
 	case "homepage_view":
 		input := createMessage("homepage_view", data)
 		_, err := snsClient.Publish(input)
 		if err != nil {
-			return fmt.Errorf("Unable to publish %v", tag)
+			return errorMessage
 		}
 	case "post_view":
 		input := createMessage("post_view", data)
 		_, err := snsClient.Publish(input)
 		if err != nil {
-			return fmt.Errorf("Unable to publish %v", tag)
+			return errorMessage
 		}
 	case "contact_view":
 		input := createMessage("profile_view", data)
 		_, err := snsClient.Publish(input)
 		if err != nil {
-			return fmt.Errorf("Unable to publish %v", tag)
+			return errorMessage
 		}
 	case "about_view":
 		input := createMessage("profile_view", data)
 		_, err := snsClient.Publish(input)
 		if err != nil {
-			return fmt.Errorf("Unable to publish %v", tag)
+			return errorMessage
 		}
 	default:
 		return fmt.Errorf("Cannot publish data %v", data)
