@@ -1,3 +1,3 @@
 export const config = {
-  AWS_REGION: 'eu-west-1', //todo read from env var e.g with dotenv
+  AWS_REGION: process.env.CDK_DEFAULT_REGION,
 };

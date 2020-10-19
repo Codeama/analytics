@@ -6,10 +6,12 @@ import {
 } from '@aws-cdk/core';
 import { Role, ServicePrincipal } from '@aws-cdk/aws-iam';
 import { CfnApi, CfnDeployment, CfnStage } from '@aws-cdk/aws-apigatewayv2';
+import { Topic } from '@aws-cdk/aws-sns';
 import { Default } from './routes/default';
 import { Views } from './routes/views';
-import { lambdaPolicy } from './policy_doc';
-
+import { lambdaPolicy } from './policies';
+import { QueueHandler } from './subscriber';
+import { config } from './config';
 export interface AnalyticsProps extends StackProps {
   namespace: string;
 }
@@ -17,11 +19,18 @@ export class AnalyticsStack extends Stack {
   private role: Role;
   private api: CfnApi;
   private namespace: string;
+  private viewsRouteKey: Views;
+  private defaultRouteKey: Default;
+  private snsTopic: Topic;
 
   constructor(scope: Construct, id: string, props: AnalyticsProps) {
     super(scope, id, props);
 
     this.namespace = props.namespace;
+    this.snsTopic = new Topic(this, id + 'Topic', {
+      topicName: this.namespace + id + 'Topic',
+    });
+
     this.api = new CfnApi(this, id + 'API', {
       name: this.namespace + 'API',
       protocolType: 'WEBSOCKET',
@@ -32,29 +41,37 @@ export class AnalyticsStack extends Stack {
       assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
     });
 
-    const viewsRouteKey = new Views(this, id + 'Views', {
+    this.viewsRouteKey = new Views(this, 'Views', {
       api: this.api,
       role: this.role,
+      topic: this.snsTopic,
+      topicRegion: config.AWS_REGION as string,
     });
 
-    const defaultRouteKey = new Default(this, id + 'Default', {
+    this.defaultRouteKey = new Default(this, 'Default', {
       api: this.api,
       role: this.role,
     });
 
     const policy = lambdaPolicy([
-      viewsRouteKey.getLambdaArn(),
-      defaultRouteKey.getLambdaArn(),
+      this.viewsRouteKey.getLambdaArn(),
+      this.defaultRouteKey.getLambdaArn(),
     ]);
 
     this.role.addToPolicy(policy);
 
-    // todo CREATE deployment function:::deployApi()
-    const deployment = new CfnDeployment(this, id + 'deployment', {
+    this.createDeployment();
+
+    this.createQueueHandlers();
+  }
+
+  // Bundles up the API resources for deployment
+  createDeployment = () => {
+    const deployment = new CfnDeployment(this, this.namespace + 'deployment', {
       apiId: this.api.ref,
     });
 
-    new CfnStage(this, id + 'stage', {
+    new CfnStage(this, this.namespace + 'stage', {
       apiId: this.api.ref,
       autoDeploy: true,
       deploymentId: deployment.ref,
@@ -62,8 +79,44 @@ export class AnalyticsStack extends Stack {
     });
 
     const dependencies = new ConcreteDependable();
-    dependencies.add(viewsRouteKey.getRoute());
-    dependencies.add(defaultRouteKey.getRoute());
+    dependencies.add(this.viewsRouteKey.getRoute());
+    dependencies.add(this.defaultRouteKey.getRoute());
     deployment.node.addDependency(dependencies);
-  }
+  };
+
+  createQueueHandlers = () => {
+    // HOME
+    const homeHandler = new QueueHandler(this, this.namespace + 'homepage', {
+      name: this.namespace + 'homeQueueFunc',
+      lambdaDir: './../../analytics-service/home-handler/dist/main.zip',
+      topic: this.snsTopic,
+    });
+
+    const homeSubscriber = homeHandler.createSubscriptionFilters([
+      'homepage_view',
+    ]);
+    this.snsTopic.addSubscription(homeSubscriber);
+
+    // POST
+    const postHandler = new QueueHandler(this, this.namespace + 'post', {
+      name: this.namespace + 'postQueueFunc',
+      lambdaDir: './../../analytics-service/post-handler/dist/main.zip',
+      topic: this.snsTopic,
+    });
+
+    const postSubscriber = postHandler.createSubscriptionFilters(['post_view']);
+    this.snsTopic.addSubscription(postSubscriber);
+
+    // PROFILE
+    const profileHandler = new QueueHandler(this, this.namespace + 'profile', {
+      name: this.namespace + 'profileQueueFunc',
+      lambdaDir: './../../analytics-service/profile-handler/dist/main.zip',
+      topic: this.snsTopic,
+    });
+
+    const profileSubscriber = profileHandler.createSubscriptionFilters([
+      'profile_view',
+    ]);
+    this.snsTopic.addSubscription(profileSubscriber);
+  };
 }

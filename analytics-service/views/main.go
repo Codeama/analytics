@@ -1,50 +1,67 @@
-// websocket lambda
+// Views lambda is both the websocket connection backend
+// that receives data from the website and
+// the initial data processing 'frontend'
+// for events sent from the blog website
+// The aim is to shift data processing logic away from the website
+// to avoid load on performance
 package main
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/codeama/analytics/analytics-service/views/processing"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sns"
+	"github.com/codeama/analytics/analytics-service/views/process"
+	"github.com/codeama/analytics/analytics-service/views/publish"
 )
 
-// IncomingData represnts data event received
-type IncomingData struct {
-	ArticleID    string `json:"articleId"`
-	ArticleTitle string `json:"articleTitle"`
-	PreviousPage string `json:"previousPage"`
-	CurrentPage  string `json:"currentPage"`
+func getSession() (*sns.SNS, error) {
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String(os.Getenv("TOPIC_REGION")),
+	})
+	if err != nil {
+		return &sns.SNS{}, fmt.Errorf("Unable to create session: %v", err)
+	}
+	session := sns.New(sess)
+	return session, nil
 }
 
 func handleRequest(ctx context.Context, request events.APIGatewayWebsocketProxyRequest) (events.APIGatewayProxyResponse, error) {
-	// todo Send raw events to SNS
-	// todo Send tagged event to SNS
-	var data IncomingData
+	fmt.Println("Incoming event:", string(request.Body))
+	var data process.IncomingData
 	if err := json.Unmarshal([]byte(request.Body), &data); err != nil {
-		return events.APIGatewayProxyResponse{}, nil
+		return events.APIGatewayProxyResponse{StatusCode: 400}, err
 	}
 
-	result, _ := json.Marshal(data)
+	// validate
+	validated, err := process.ValidateData(data, request.RequestContext.ConnectionID)
+	if err != nil {
+		return events.APIGatewayProxyResponse{StatusCode: 400}, err
+	}
 
-	fmt.Println("Incoming event:", result)
+	// filter
+	event := process.FilterData(validated)
 
-	var forwardData processing.ViewData
-	forwardData.ArticleID = data.ArticleID
-	forwardData.ArticleTitle = data.ArticleTitle
-	forwardData.PreviousPage = data.PreviousPage
-	forwardData.CurrentPage = data.CurrentPage
-	forwardData.ConnectionID = request.RequestContext.ConnectionID
+	// process and tag
+	eventType, taggedData, _ := process.Sort(event)
+	fmt.Printf("Tagged data: %v", taggedData)
 
-	// Process data
-	translatedData, _ := processing.TranslateData(forwardData)
+	// convert eventType to a Tag struct
+	tag := &publish.Tag{Name: eventType}
 
-	// Marshal data
-	processedData, _ := json.Marshal(translatedData)
+	// get config
+	session, _ := getSession()
 
-	fmt.Println("Processed data:", processedData)
+	// publish to SNS
+	if err := tag.SendEvent(session, taggedData); err != nil {
+		return events.APIGatewayProxyResponse{StatusCode: 422}, err
+	}
 
 	return events.APIGatewayProxyResponse{
 		Body:       string(fmt.Sprintf("New lambda: User %s connected!", request.RequestContext.ConnectionID)),

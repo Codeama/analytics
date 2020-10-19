@@ -12,4 +12,8 @@ const namespace = process.env.NAMESPACE as string;
 const app = new cdk.App();
 new AnalyticsStack(app, namespace + 'Analytics', {
   namespace,
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: process.env.CDK_DEFAULT_REGION,
+  },
 });

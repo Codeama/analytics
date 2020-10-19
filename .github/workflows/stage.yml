@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - stage
+      - master # triggered on merge to master
 
 jobs:
   build:
@@ -26,7 +27,12 @@ jobs:
         with:
           go-version: 1.15
 
-      - name: "Package build files"
+      - name: "Run lambda unit tests"
+        run: |
+          chmod +x ./test.sh
+          ./test.sh
+
+      - name: "Build and package lambdas"
         run: |
           chmod +x ./build_package.sh
           ./build_package.sh
