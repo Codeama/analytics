@@ -2,6 +2,7 @@ package process
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/aws/aws-lambda-go/events"
 )
@@ -24,6 +25,7 @@ type ProcessedEvent struct {
 	TotalViews   int // includes a count of non-unique views
 }
 
+// Checks if event is a unique view of post/article
 func isUnique(previousPage string, currentPage string) bool {
 	// UNIQUE: if currentPage is not a / and previousPage is not null
 	if previousPage != "null" {
@@ -33,12 +35,10 @@ func isUnique(previousPage string, currentPage string) bool {
 }
 
 // CountViews totals the number of views for each article
-// It filters each article by implementing a set using Go map
-// and totals them each one being a view (1)
-// Employs a map reduce paradigm
-// TODO count unique views
-// TODO create a function to extract map values and return an array of items to send to the database
-func CountViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
+// It processes each article event by implementing a set using Go map
+// and totals them, each one being a view (1)
+// Employs a map reduce paradigm for parallel data processing
+func countViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
 	var data incomingEvent
 	var totalViews = make(map[string]int)
 	var uniqueViews = make(map[string]int)
@@ -46,7 +46,8 @@ func CountViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
 	for _, message := range sqsEvent.Records {
 		// serialise to Go struct
 		if err := json.Unmarshal([]byte(message.Body), &data); err != nil {
-			return nil, err
+			// fmt.Println("Could not deserialise data: ", err)
+			return nil, fmt.Errorf("Could not deserialise data: %v", err)
 		}
 		// checks current article has a view value
 		_, hasViews := totalViews[data.ArticleID]
@@ -72,6 +73,7 @@ func CountViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
 				UniqueViews:  uniqueViews[data.ArticleID],
 				TotalViews:   totalViews[data.ArticleID],
 			}
+			// update article values
 			mappedArt[data.ArticleID] = processed
 		} else {
 			unique := isUnique(data.PreviousPage, data.CurrentPage)
@@ -89,12 +91,20 @@ func CountViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
 				UniqueViews:  uniqueViews[data.ArticleID],
 				TotalViews:   totalViews[data.ArticleID],
 			}
+			// create initial entry for article
 			mappedArt[data.ArticleID] = processed
 		}
 
 	}
 
-	// return unique items only
 	return mappedArt, nil
+}
 
+// GetPosts iterates over a map of articles and retrieves the Articles
+func GetPosts(data map[string]ProcessedEvent) []ProcessedEvent {
+	var articles []ProcessedEvent
+	for _, article := range data {
+		articles = append(articles, article)
+	}
+	return articles
 }
