@@ -13,30 +13,32 @@ var mockCountResult = map[string]ProcessedEvent{
 	"testArticleID": ProcessedEvent{
 		ArticleID:    "testArticleID",
 		ArticleTitle: "Test Title",
-		ConnectionID: "testConnectionId",
 		UniqueViews:  2,
 		TotalViews:   3,
 	},
 	"testArticleID2": ProcessedEvent{
 		ArticleID:    "testArticleID2",
 		ArticleTitle: "Test Title",
-		ConnectionID: "testConnectionId2",
 		UniqueViews:  1,
 		TotalViews:   1,
 	},
 	"testArticleID3": ProcessedEvent{
 		ArticleID:    "testArticleID3",
 		ArticleTitle: "Test Title",
-		ConnectionID: "testConnectionId3",
 		UniqueViews:  3,
 		TotalViews:   3,
 	},
 	"testArticleID4": ProcessedEvent{
 		ArticleID:    "testArticleID4",
 		ArticleTitle: "Test Title",
-		ConnectionID: "testConnectionId4",
 		UniqueViews:  1,
 		TotalViews:   1,
+	},
+	"testArticleID5": ProcessedEvent{
+		ArticleID:    "testArticleID5",
+		ArticleTitle: "Test Title",
+		UniqueViews:  1,
+		TotalViews:   2,
 	},
 }
 

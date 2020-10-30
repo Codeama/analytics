@@ -20,15 +20,13 @@ type incomingEvent struct {
 type ProcessedEvent struct {
 	ArticleID    string
 	ArticleTitle string
-	ConnectionID string
 	UniqueViews  int
 	TotalViews   int // includes a count of non-unique views
 }
 
 func isUnique(previousPage string, currentPage string) bool {
 	// UNIQUE: if currentPage is not a / and previousPage is not null
-	// HomePage is "/"
-	if currentPage != "/" && previousPage != "null" {
+	if previousPage != "null" {
 		return true
 	}
 	return false
@@ -71,23 +69,23 @@ func CountViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
 			processed := ProcessedEvent{
 				ArticleID:    data.ArticleID,
 				ArticleTitle: data.ArticleTitle,
-				ConnectionID: data.ConnectionID,
 				UniqueViews:  uniqueViews[data.ArticleID],
 				TotalViews:   totalViews[data.ArticleID],
 			}
 			mappedArt[data.ArticleID] = processed
 		} else {
 			unique := isUnique(data.PreviousPage, data.CurrentPage)
+			// process unique views
 			if unique {
 				uniqueViews[data.ArticleID] = 1
 			} else {
 				uniqueViews[data.ArticleID] = 0
 			}
+			// process all views
 			totalViews[data.ArticleID] = 1
 			processed := ProcessedEvent{
 				ArticleID:    data.ArticleID,
 				ArticleTitle: data.ArticleTitle,
-				ConnectionID: data.ConnectionID,
 				UniqueViews:  uniqueViews[data.ArticleID],
 				TotalViews:   totalViews[data.ArticleID],
 			}
