@@ -11,8 +11,8 @@
 # fi
 
 service_handlers="
-analytics-service/default
-analytics-service/views
+analytics-service/default-stream
+analytics-service/views-stream
 analytics-service/home-handler
 analytics-service/post-handler
 analytics-service/profile-handler

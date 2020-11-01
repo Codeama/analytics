@@ -1,6 +1,6 @@
 service_handlers="
-analytics-service/default
-analytics-service/views
+analytics-service/default-stream
+analytics-service/views-stream
 analytics-service/post-handler
 analytics-service/profile-handler
 "
@@ -10,6 +10,7 @@ for dir in $service_handlers
 do
 cd "$dir" || exit
 go test -v -cover ./...
+# go tool cover -html=c.out -o coverage.html
 cd - || exit 
 done
 
