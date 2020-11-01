@@ -88,13 +88,13 @@ func TestCountViews(t *testing.T) {
 	if err := json.Unmarshal(inputJSON, &inputEvent); err != nil {
 		t.Errorf("could not unmarshal data. details: %v", err)
 	}
-	actual, _ := countViews(inputEvent)
+	actual, _ := CountViews(inputEvent)
 	assert.Equal(t, mockViewCount, actual)
 }
 
 func TestGetPosts(t *testing.T) {
 	var expected ProcessedEvent
-	posts := GetPosts(mockViewCount)
+	posts := GetCountedPosts(mockViewCount)
 	assert.Equal(t, len(mockPostResult), len(posts), "It should return an array of same length as the map input data")
 	// no guarantee of map item order so iterating over both actual and expected
 	for _, actual := range posts {

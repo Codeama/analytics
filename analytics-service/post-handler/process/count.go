@@ -38,7 +38,7 @@ func isUnique(previousPage string, currentPage string) bool {
 // It processes each article event by implementing a set using Go map
 // and totals them, each one being a view (1)
 // Employs a map reduce paradigm for parallel data processing
-func countViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
+func CountViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
 	var data incomingEvent
 	var totalViews = make(map[string]int)
 	var uniqueViews = make(map[string]int)
@@ -100,8 +100,8 @@ func countViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
 	return mappedArt, nil
 }
 
-// GetPosts iterates over a map of articles and retrieves the Articles
-func GetPosts(data map[string]ProcessedEvent) []ProcessedEvent {
+// GetCountedPosts iterates over a map of articles and retrieves the Articles
+func GetCountedPosts(data map[string]ProcessedEvent) []ProcessedEvent {
 	var articles []ProcessedEvent
 	for _, article := range data {
 		articles = append(articles, article)
