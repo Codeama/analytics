@@ -10,7 +10,7 @@ import { Topic } from '@aws-cdk/aws-sns';
 import { Default } from './routes/default';
 import { Views } from './routes/views';
 import { lambdaPolicy } from './policies';
-import { QueueHandler } from './subscriber';
+import { HitsHandler } from './subscriber';
 import { config } from './config';
 import { StreamViewType } from '@aws-cdk/aws-dynamodb';
 import { Store } from './data-store/table';
@@ -26,7 +26,7 @@ export class AnalyticsStack extends Stack {
   private defaultRouteKey: Default;
   // The SNS topic for hit counter lambdas to subscribe to
   private snsTopic: Topic;
-  private postCounter: QueueHandler;
+  private postHitsHandler: HitsHandler;
   private streamHandler: StreamHandler;
 
   constructor(scope: Construct, id: string, props: AnalyticsProps) {
@@ -94,37 +94,39 @@ export class AnalyticsStack extends Stack {
 
   createHitHandlers = () => {
     // HOME
-    const homeHandler = new QueueHandler(this, this.namespace + 'homepage', {
+    const homeHitsHandler = new HitsHandler(this, this.namespace + 'homepage', {
       name: this.namespace + 'homeQueueFunc',
-      lambdaDir: './../../analytics-service/home-handler/dist/main.zip',
+      lambdaDir: './../../analytics-service/home-hits/dist/main.zip',
       topic: this.snsTopic,
     });
 
-    const homeSubscriber = homeHandler.createSubscriptionFilters([
-      'homepage_view',
-    ]);
-    this.snsTopic.addSubscription(homeSubscriber);
+    this.snsTopic.addSubscription(
+      homeHitsHandler.createSubscriptionFilters(['homepage_view'])
+    );
 
     // POST
-    this.postCounter = new QueueHandler(this, this.namespace + 'post', {
+    this.postHitsHandler = new HitsHandler(this, this.namespace + 'post', {
       name: this.namespace + 'postQueueFunc',
-      lambdaDir: './../../analytics-service/post-handler/dist/main.zip',
+      lambdaDir: './../../analytics-service/post-hits/dist/main.zip',
       topic: this.snsTopic,
     });
 
-    const postSubscriber = this.postCounter.createSubscriptionFilters([
-      'post_view',
-    ]);
-    this.snsTopic.addSubscription(postSubscriber);
+    this.snsTopic.addSubscription(
+      this.postHitsHandler.createSubscriptionFilters(['post_view'])
+    );
 
     // PROFILE
-    const profileHandler = new QueueHandler(this, this.namespace + 'profile', {
-      name: this.namespace + 'profileQueueFunc',
-      lambdaDir: './../../analytics-service/profile-handler/dist/main.zip',
-      topic: this.snsTopic,
-    });
+    const profileHitsHandler = new HitsHandler(
+      this,
+      this.namespace + 'profile',
+      {
+        name: this.namespace + 'profileQueueFunc',
+        lambdaDir: './../../analytics-service/profile-hits/dist/main.zip',
+        topic: this.snsTopic,
+      }
+    );
 
-    const profileSubscriber = profileHandler.createSubscriptionFilters([
+    const profileSubscriber = profileHitsHandler.createSubscriptionFilters([
       'profile_view',
     ]);
     this.snsTopic.addSubscription(profileSubscriber);
@@ -144,7 +146,7 @@ export class AnalyticsStack extends Stack {
     const table = new Store(this, this.namespace + 'Table', {
       tableName: 'PostCountWriter',
       indexName: 'articleId',
-      lambdaGrantee: this.postCounter.subscribeFunc,
+      lambdaGrantee: this.postHitsHandler.subscribeFunc,
       stream: StreamViewType.NEW_IMAGE,
     });
 

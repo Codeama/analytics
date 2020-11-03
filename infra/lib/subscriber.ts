@@ -12,7 +12,7 @@ interface HandlerProps {
   topic: Topic;
 }
 
-export class QueueHandler extends Construct {
+export class HitsHandler extends Construct {
   readonly subscribeFunc: Function;
   private queue: Queue;
   constructor(scope: Construct, id: string, props: HandlerProps) {

@@ -1,8 +1,8 @@
 service_handlers="
 analytics-service/default-stream
 analytics-service/views-stream
-analytics-service/post-handler
-analytics-service/profile-handler
+analytics-service/post-hits
+analytics-service/profile-hits
 "
 
 # Run all lambda tests
