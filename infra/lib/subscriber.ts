@@ -13,7 +13,7 @@ interface HandlerProps {
 }
 
 export class QueueHandler extends Construct {
-  private subscribeFunc: Function;
+  readonly subscribeFunc: Function;
   private queue: Queue;
   constructor(scope: Construct, id: string, props: HandlerProps) {
     super(scope, id);
