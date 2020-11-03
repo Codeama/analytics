@@ -16,6 +16,7 @@ analytics-service/views-stream
 analytics-service/home-handler
 analytics-service/post-handler
 analytics-service/profile-handler
+analytics-service/dynamo-stream
 "
 
 # Build and package Go Lambda binaries
