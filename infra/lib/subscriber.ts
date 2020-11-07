@@ -10,6 +10,8 @@ interface HandlerProps {
   name: string;
   lambdaDir: string;
   topic: Topic;
+  region: string;
+  tableName: string;
 }
 
 export class HitsHandler extends Construct {
@@ -25,6 +27,8 @@ export class HitsHandler extends Construct {
       timeout: Duration.seconds(5),
       environment: {
         TOPIC_ARN: props.topic.topicArn,
+        TABLE_REGION: props.region,
+        TABLE_NAME: props.tableName,
       },
     });
 

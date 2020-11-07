@@ -26,6 +26,8 @@ export class AnalyticsStack extends Stack {
   private defaultRouteKey: Default;
   // The SNS topic for hit counter lambdas to subscribe to
   private snsTopic: Topic;
+  private homeHitsHandler: HitsHandler;
+  private profileHitsHandler: HitsHandler;
   private postHitsHandler: HitsHandler;
   private streamHandler: StreamHandler;
 
@@ -94,14 +96,16 @@ export class AnalyticsStack extends Stack {
 
   createHitHandlers = () => {
     // HOME
-    const homeHitsHandler = new HitsHandler(this, this.namespace + 'homepage', {
+    this.homeHitsHandler = new HitsHandler(this, this.namespace + 'homepage', {
       name: this.namespace + 'homeQueueFunc',
       lambdaDir: './../../analytics-service/home-hits/dist/main.zip',
       topic: this.snsTopic,
+      tableName: '',
+      region: '',
     });
 
     this.snsTopic.addSubscription(
-      homeHitsHandler.createSubscriptionFilters(['homepage_view'])
+      this.homeHitsHandler.createSubscriptionFilters(['homepage_view'])
     );
 
     // POST
@@ -109,6 +113,8 @@ export class AnalyticsStack extends Stack {
       name: this.namespace + 'postQueueFunc',
       lambdaDir: './../../analytics-service/post-hits/dist/main.zip',
       topic: this.snsTopic,
+      tableName: config.POST_TABLE_WRITER,
+      region: config.AWS_REGION as string,
     });
 
     this.snsTopic.addSubscription(
@@ -116,43 +122,48 @@ export class AnalyticsStack extends Stack {
     );
 
     // PROFILE
-    const profileHitsHandler = new HitsHandler(
+    this.profileHitsHandler = new HitsHandler(
       this,
       this.namespace + 'profile',
       {
         name: this.namespace + 'profileQueueFunc',
         lambdaDir: './../../analytics-service/profile-hits/dist/main.zip',
         topic: this.snsTopic,
+        region: '',
+        tableName: '',
       }
     );
 
-    const profileSubscriber = profileHitsHandler.createSubscriptionFilters([
-      'profile_view',
-    ]);
+    const profileSubscriber = this.profileHitsHandler.createSubscriptionFilters(
+      ['profile_view']
+    );
     this.snsTopic.addSubscription(profileSubscriber);
 
-    // DynamoDB stream lambda function
+    // DynamoDB stream lambda function that writes to the PostCountReader table
+    // after being triggered by DynamoDB streams
     this.streamHandler = new StreamHandler(
       this,
       this.namespace + 'StreamLambda',
       {
         lambdaDir: './../../../analytics-service/dynamo-stream/dist/main.zip',
-        tableName: 'StreamTable',
+        tableName: config.POST_TABLE_READER,
       }
     );
   };
 
   createStorageTables = () => {
-    const table = new Store(this, this.namespace + 'Table', {
-      tableName: 'PostCountWriter',
+    const postWriterTable = new Store(this, this.namespace + 'WriterTable', {
+      tableName: config.POST_TABLE_WRITER,
       indexName: 'articleId',
+      // Permission for post handler Lambda access
       lambdaGrantee: this.postHitsHandler.subscribeFunc,
       stream: StreamViewType.NEW_IMAGE,
     });
 
-    const readerTable = new Store(this, this.namespace + 'ReaderTable', {
-      tableName: 'StreamTable',
+    const postReaderTable = new Store(this, this.namespace + 'ReaderTable', {
+      tableName: config.POST_TABLE_READER,
       indexName: 'articleId',
+      // Permission for dynamodb stream handler Lambda access
       lambdaGrantee: this.streamHandler.lambda,
     });
   };
