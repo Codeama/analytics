@@ -101,6 +101,7 @@ func CountViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
 }
 
 // GetCountedPosts iterates over a map of articles and retrieves the Articles
+// Returns a slice of Article items with updated stats
 func GetCountedPosts(data map[string]ProcessedEvent) []ProcessedEvent {
 	var articles []ProcessedEvent
 	for _, article := range data {
