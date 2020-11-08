@@ -25,7 +25,10 @@ export class Default extends Construct {
     this.defaultFunc = new Function(this, 'DefaultFunction', {
       runtime: Runtime.GO_1_X,
       code: Code.fromAsset(
-        path.join(__dirname, '../../../analytics-service/default/dist/main.zip')
+        path.join(
+          __dirname,
+          '../../../analytics-service/default-stream/dist/main.zip'
+        )
       ),
       handler: 'main',
     });

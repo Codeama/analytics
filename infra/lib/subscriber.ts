@@ -4,38 +4,51 @@ import { Topic, SubscriptionFilter } from '@aws-cdk/aws-sns';
 import { Queue } from '@aws-cdk/aws-sqs';
 import { SqsSubscription } from '@aws-cdk/aws-sns-subscriptions';
 import { SqsEventSource } from '@aws-cdk/aws-lambda-event-sources';
-import { Construct } from '@aws-cdk/core';
+import { Construct, Duration } from '@aws-cdk/core';
 
 interface HandlerProps {
   name: string;
   lambdaDir: string;
   topic: Topic;
+  region: string;
+  tableName: string;
 }
 
-export class QueueHandler extends Construct {
-  private subscribeFunc: Function;
+export class HitsHandler extends Construct {
+  readonly subscribeFunc: Function;
   private queue: Queue;
   constructor(scope: Construct, id: string, props: HandlerProps) {
     super(scope, id);
-    // TODO increase lambda timeout
     this.subscribeFunc = new Function(this, 'Subscriber', {
       runtime: Runtime.GO_1_X,
       code: Code.fromAsset(path.join(__dirname, props.lambdaDir)),
       handler: 'main',
-      reservedConcurrentExecutions: 1,
+      reservedConcurrentExecutions: 1, // <--- this is a temp solution to avoid creating a lock mechanism for dynamodb :(
+      timeout: Duration.seconds(5),
       environment: {
         TOPIC_ARN: props.topic.topicArn,
+        TABLE_REGION: props.region,
+        TABLE_NAME: props.tableName,
       },
+    });
+
+    // DLQ
+    const dlq = new Queue(this, id + 'DLQ', {
+      queueName: id + 'DLQ',
     });
 
     this.queue = new Queue(this, id + 'Queue', {
       queueName: id + 'Queue',
+      deadLetterQueue: {
+        queue: dlq,
+        maxReceiveCount: 5, // total retries before message lands in dlq
+      },
     });
 
     // Lambda SQS trigger
     this.subscribeFunc.addEventSource(
       new SqsEventSource(this.queue, {
-        batchSize: 1,
+        // batchSize: 3,
       })
     );
   }

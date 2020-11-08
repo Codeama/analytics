@@ -16,4 +16,5 @@ new AnalyticsStack(app, namespace + 'Analytics', {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
   },
+  description: 'An analytics server for a JAMStack blogsite that uses Gatsby',
 });

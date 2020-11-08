@@ -11,11 +11,12 @@
 # fi
 
 service_handlers="
-analytics-service/default
-analytics-service/views
-analytics-service/home-handler
-analytics-service/post-handler
-analytics-service/profile-handler
+analytics-service/default-stream
+analytics-service/views-stream
+analytics-service/home-hits
+analytics-service/post-hits
+analytics-service/profile-hits
+analytics-service/dynamo-stream
 "
 
 # Build and package Go Lambda binaries

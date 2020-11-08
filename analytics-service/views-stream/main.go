@@ -1,9 +1,8 @@
-// Views lambda is both the websocket connection backend
-// that receives data from the website and
-// the initial data processing 'frontend'
-// for events sent from the blog website
+// Stream lambda is both the websocket backend
+// that receives data from the website and does
+// the initial data processing for events sent from the blog website
 // The aim is to shift data processing logic away from the website
-// to avoid load on performance
+// and avoid load on performance
 package main
 
 import (
@@ -17,8 +16,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sns"
-	"github.com/codeama/analytics/analytics-service/views/process"
-	"github.com/codeama/analytics/analytics-service/views/publish"
+	"github.com/codeama/analytics/analytics-service/views-stream/process"
+	"github.com/codeama/analytics/analytics-service/views-stream/publish"
 )
 
 func getSession() (*sns.SNS, error) {

@@ -1,4 +1,6 @@
-// Homepage view queue subscriber
+// home-hits is a Lambda subscriber function
+// to home SQS service
+// It processes and counts hits on the homepage
 package main
 
 import (
@@ -8,10 +10,6 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
-
-// type ResponseData struct {
-// 	ConnectionID string `json:"connectionId"`
-// }
 
 func handleQueueMessage(ctx context.Context, sqsEvent events.SQSEvent) error {
 	for _, message := range sqsEvent.Records {
