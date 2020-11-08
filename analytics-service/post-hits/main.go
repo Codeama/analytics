@@ -11,16 +11,6 @@ import (
 	"github.com/codeama/analytics/analytics-service/post-hits/store"
 )
 
-// IncomingEvent is the type of event expected
-type incomingEvent struct {
-	ArticleID    string
-	ArticleTitle string
-	PreviousPage string
-	CurrentPage  string
-	EventType    string
-	ConnectionID string
-}
-
 func handleQueueMessage(ctx context.Context, sqsEvent events.SQSEvent) error {
 	count, err := process.CountViews(sqsEvent)
 	if err != nil {
