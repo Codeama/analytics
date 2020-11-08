@@ -13,7 +13,7 @@ export class Store extends Construct {
   constructor(scope: Construct, id: string, props: StoreProps) {
     super(scope, id);
 
-    this.table = new Table(this, 'id' + Table, {
+    this.table = new Table(this, id + 'Table', {
       partitionKey: {
         name: props.indexName,
         type: AttributeType.STRING,
