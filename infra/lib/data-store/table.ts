@@ -9,7 +9,7 @@ interface StoreProps {
   lambdaGrantee: Function;
 }
 export class Store extends Construct {
-  private table: Table;
+  readonly table: Table;
   constructor(scope: Construct, id: string, props: StoreProps) {
     super(scope, id);
 
