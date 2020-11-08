@@ -138,17 +138,6 @@ export class AnalyticsStack extends Stack {
       ['profile_view']
     );
     this.snsTopic.addSubscription(profileSubscriber);
-
-    // DynamoDB stream lambda function that writes to the PostCountReader table
-    // after being triggered by DynamoDB streams
-    this.streamHandler = new StreamHandler(
-      this,
-      this.namespace + 'StreamLambda',
-      {
-        lambdaDir: './../../../analytics-service/dynamo-stream/dist/main.zip',
-        tableName: config.POST_TABLE_READER,
-      }
-    );
   };
 
   createStorageTables = () => {
@@ -160,10 +149,23 @@ export class AnalyticsStack extends Stack {
       stream: StreamViewType.NEW_IMAGE,
     });
 
+    // DynamoDB stream lambda function that writes to the PostCountReader table
+    // after being triggered by DynamoDB streams
+    this.streamHandler = new StreamHandler(
+      this,
+      this.namespace + 'StreamLambda',
+      {
+        lambdaDir: './../../../analytics-service/dynamo-stream/dist/main.zip',
+        tableName: config.POST_TABLE_READER,
+        region: config.AWS_REGION as string,
+        triggerSource: postWriterTable.table,
+      }
+    );
+
     const postReaderTable = new Store(this, this.namespace + 'ReaderTable', {
       tableName: config.POST_TABLE_READER,
       indexName: 'articleId',
-      // Permission for dynamodb stream handler Lambda access
+      // Permission for dynamodb stream handler Lambda to write
       lambdaGrantee: this.streamHandler.lambda,
     });
   };

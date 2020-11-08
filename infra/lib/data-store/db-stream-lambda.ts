@@ -3,11 +3,16 @@
  */
 import * as path from 'path';
 import { Construct, Duration } from '@aws-cdk/core';
-import { Code, Function, Runtime } from '@aws-cdk/aws-lambda';
+import { Code, Function, Runtime, StartingPosition } from '@aws-cdk/aws-lambda';
+import { DynamoEventSource, SqsDlq } from '@aws-cdk/aws-lambda-event-sources';
+import { Table } from '@aws-cdk/aws-dynamodb';
+import { Queue } from '@aws-cdk/aws-sqs';
 
 interface StreamProps {
   lambdaDir: string;
   tableName: string;
+  region: string;
+  triggerSource: Table;
 }
 export class StreamHandler extends Construct {
   readonly lambda: Function;
@@ -22,7 +27,23 @@ export class StreamHandler extends Construct {
       timeout: Duration.seconds(5),
       environment: {
         TABLE_NAME: props.tableName,
+        TABLE_REGION: props.region,
       },
     });
+
+    // DLQ
+    const dlq = new Queue(this, id + 'StreamsDLQ', {
+      queueName: id + 'StreamsDLQ',
+    });
+
+    this.lambda.addEventSource(
+      new DynamoEventSource(props.triggerSource, {
+        startingPosition: StartingPosition.TRIM_HORIZON,
+        batchSize: 5,
+        bisectBatchOnError: true,
+        onFailure: new SqsDlq(dlq),
+        retryAttempts: 10,
+      })
+    );
   }
 }
