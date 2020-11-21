@@ -7,6 +7,7 @@ interface StoreProps {
   tableName: string;
   stream?: StreamViewType;
   lambdaGrantee: Function;
+  readerGrantee?: Function;
 }
 export class Store extends Construct {
   readonly table: Table;
@@ -23,5 +24,6 @@ export class Store extends Construct {
     });
 
     this.table.grantReadWriteData(props.lambdaGrantee.grantPrincipal);
+    props.readerGrantee ? this.table.grantReadData(props.readerGrantee) : null;
   }
 }

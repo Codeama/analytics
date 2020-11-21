@@ -54,6 +54,7 @@ export class AnalyticsStack extends Stack {
       role: this.role,
       topic: this.snsTopic,
       topicRegion: config.AWS_REGION as string,
+      tableName: config.POST_TABLE_READER,
     });
 
     this.defaultRouteKey = new Default(this, 'Default', {
@@ -167,6 +168,7 @@ export class AnalyticsStack extends Stack {
       indexName: 'articleId',
       // Permission for dynamodb stream handler Lambda to write
       lambdaGrantee: this.streamHandler.lambda,
+      readerGrantee: this.viewsRouteKey.viewsFunc,
     });
   };
 }
