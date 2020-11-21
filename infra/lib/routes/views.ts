@@ -16,9 +16,10 @@ interface ViewsProps {
   role: Role;
   topic: Topic;
   topicRegion: string;
+  tableName: string;
 }
 export class Views extends Construct {
-  private viewsFunc: Function;
+  readonly viewsFunc: Function;
   private route: CfnRoute;
   private lambdaIntegration: CfnIntegration;
 
@@ -37,6 +38,7 @@ export class Views extends Construct {
       environment: {
         TOPIC_ARN: props.topic.topicArn,
         TOPIC_REGION: props.topicRegion,
+        TABLE_NAME: props.tableName,
       },
     });
 
