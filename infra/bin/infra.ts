@@ -7,6 +7,8 @@ if (!process.env.NAMESPACE) {
   throw Error('NAMESPACE environment must be set.');
 }
 
+const protect = process.env.NAMESPACE === 'prod' ? true : false;
+
 const namespace = process.env.NAMESPACE as string;
 
 const app = new cdk.App();
@@ -16,5 +18,6 @@ new AnalyticsStack(app, namespace + 'Analytics', {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
   },
-  description: 'An analytics server for a JAMStack blogsite that uses Gatsby',
+  terminationProtection: protect,
+  description: 'Analytics server for my JAMStack blogsite',
 });
