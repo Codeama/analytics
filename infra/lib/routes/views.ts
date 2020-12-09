@@ -7,7 +7,7 @@ import {
   CfnRouteResponse,
   CfnIntegrationResponse,
 } from '@aws-cdk/aws-apigatewayv2';
-import { Role } from '@aws-cdk/aws-iam';
+import { ManagedPolicy, Role } from '@aws-cdk/aws-iam';
 import { Topic } from '@aws-cdk/aws-sns';
 import { config } from './../config';
 
@@ -41,6 +41,11 @@ export class Views extends Construct {
         TABLE_NAME: props.tableName,
       },
     });
+
+    // Grant API invoke permission to lambda
+    this.viewsFunc.role?.addManagedPolicy(
+      ManagedPolicy.fromAwsManagedPolicyName('AmazonAPIGatewayInvokeFullAccess')
+    );
 
     // Topic permission
     props.topic.grantPublish(this.viewsFunc);
