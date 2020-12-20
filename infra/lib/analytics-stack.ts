@@ -49,12 +49,16 @@ export class AnalyticsStack extends Stack {
       assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
     });
 
+    // This is the URL that'll be generated after successful deployment of the API
+    // where stage name (see below) is this.namespace
+    const url = `https://${this.api.ref}.execute-api.${config.AWS_REGION}.amazonaws.com/${this.namespace}`;
     this.viewsRouteKey = new Views(this, 'Views', {
       api: this.api,
       role: this.role,
       topic: this.snsTopic,
       topicRegion: config.AWS_REGION as string,
       tableName: config.POST_TABLE_READER,
+      apiUrl: url,
     });
 
     this.defaultRouteKey = new Default(this, 'Default', {
