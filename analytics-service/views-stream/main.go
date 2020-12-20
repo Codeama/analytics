@@ -26,20 +26,46 @@ type response struct {
 	ArticleViews int `json:"uniqueViews"`
 }
 
-func getSession() (*sns.SNS, error) {
+func getSession() (*session.Session, error) {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("TOPIC_REGION")),
 	})
 	if err != nil {
-		return &sns.SNS{}, fmt.Errorf("Unable to create session: %v", err)
+		return nil, fmt.Errorf("Unable to create session: %v", err)
 	}
-	session := sns.New(sess)
-	return session, nil
+	return sess, nil
+}
+
+func getSNSService(session *session.Session) *sns.SNS {
+	return sns.New(session)
+}
+
+func sendStats(data store.ArticleViews, session *session.Session, connection string) {
+
+	apigw := apigatewaymanagementapi.New(session, &aws.Config{
+		Endpoint: aws.String(os.Getenv("API_URL")),
+	})
+
+	viewsStats, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("Marshal data failed: ", err)
+	}
+
+	_, err = apigw.PostToConnection(&apigatewaymanagementapi.PostToConnectionInput{
+		ConnectionId: aws.String(connection),
+		Data:         viewsStats,
+	})
+	if err != nil {
+		fmt.Println("Post to connection failed: ", err)
+	}
 }
 
 func handleRequest(ctx context.Context, request events.APIGatewayWebsocketProxyRequest) (events.APIGatewayProxyResponse, error) {
 	fmt.Println("Incoming event:", string(request.Body))
 	var data process.IncomingData
+
+	// If error, return as data is useless
+	// You give nothing, you get nothing >.<
 	if err := json.Unmarshal([]byte(request.Body), &data); err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: 400}, fmt.Errorf("Error: %v", err)
 	}
@@ -55,65 +81,36 @@ func handleRequest(ctx context.Context, request events.APIGatewayWebsocketProxyR
 
 	// process and tag
 	eventType, taggedData, _ := process.Sort(event)
-	fmt.Printf("Tagged data: %v", taggedData)
+	fmt.Printf("Tag data: %v", taggedData)
 
 	// convert eventType to a Tag struct
 	tag := &publish.Tag{Name: eventType}
 
-	// get config
-	snsSession, _ := getSession()
-
-	// publish to SNS
-	if err := tag.SendEvent(snsSession, taggedData); err != nil {
-		fmt.Println("Send event failed:", err)
-		return events.APIGatewayProxyResponse{StatusCode: 422}, fmt.Errorf("SendEvent Error: %v", err)
-	}
-
-	connectionSess, err := session.NewSession(&aws.Config{
-		Region: aws.String(os.Getenv("TOPIC_REGION")), //TODO refactor session logic
-	})
-
-	if err != nil {
-		fmt.Println("Connection session failed.")
-		// return events.APIGatewayProxyResponse{StatusCode: 400}, fmt.Errorf("Session Error: %v", err)
-	}
-
-	views := store.ArticleViews{}
-	// check incoming data is an article
-	if data.ArticleID != "" {
-		// read article stats
-		fmt.Println("Attempting to send to Connected client...")
-		views, err = store.GetArticleViews(data.ArticleID)
-		if err != nil {
-			fmt.Println("Couldn't get article views from data store.")
-			// return events.APIGatewayProxyResponse{StatusCode: 400}, fmt.Errorf("ReadTable Error: %v", err)
+	// get session
+	session, err := getSession()
+	if session != nil {
+		// get SNS service
+		snsService := getSNSService(session)
+		// publish to SNS
+		if err := tag.SendEvent(snsService, taggedData); err != nil {
+			fmt.Println("Send event failed:", err)
 		}
-	}
 
-	viewsStats, err := json.Marshal(views)
+		// If stream data is article, retrieve stats and post to connection
+		views := store.ArticleViews{}
+		if data.ArticleID != "" {
+			views, err = store.GetArticleViews(data.ArticleID)
+			if err != nil {
+				fmt.Println("Couldn't get article views from data store.", err)
+			}
+			// Send stats
+			sendStats(views, session, request.RequestContext.ConnectionID)
+		}
 
-	apigw := apigatewaymanagementapi.New(connectionSess, &aws.Config{
-		Endpoint: aws.String("https://bplqdxpti2.execute-api.eu-west-2.amazonaws.com/test"),
-	})
-	_, err = apigw.PostToConnection(&apigatewaymanagementapi.PostToConnectionInput{
-		ConnectionId: aws.String(request.RequestContext.ConnectionID),
-		Data:         viewsStats,
-	})
-	if err != nil {
-		fmt.Println("Post to connection failed: ", err)
-		// return events.APIGatewayProxyResponse{StatusCode: 400}, fmt.Errorf("PostToConnection Error: %v", err)
-	}
-	// fmt.Println("PostToCONNECTION: ", output)
-
-	stats, err := json.Marshal(request.RequestContext.ConnectionID)
-	if err != nil {
-		fmt.Println("Could not marshall request ID")
 	}
 
 	return events.APIGatewayProxyResponse{
-		// Mehh when you finish a project and realise you don't need websockets >.<
-		// But I learned a lot...
-		Body:       string(stats),
+		// No need to send body data as this is sent via websocket connection
 		StatusCode: 200,
 	}, nil
 }
