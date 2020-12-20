@@ -17,6 +17,7 @@ interface ViewsProps {
   topic: Topic;
   topicRegion: string;
   tableName: string;
+  apiUrl: string;
 }
 export class Views extends Construct {
   readonly viewsFunc: Function;
@@ -39,6 +40,7 @@ export class Views extends Construct {
         TOPIC_ARN: props.topic.topicArn,
         TOPIC_REGION: props.topicRegion,
         TABLE_NAME: props.tableName,
+        API_URL: props.apiUrl,
       },
     });
 
