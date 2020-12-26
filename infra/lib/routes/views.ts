@@ -1,6 +1,6 @@
 import * as path from 'path';
 import { Function, Runtime, Code } from '@aws-cdk/aws-lambda';
-import { Construct, CfnRefElement } from '@aws-cdk/core';
+import { Construct, CfnRefElement, Fn } from '@aws-cdk/core';
 import {
   CfnIntegration,
   CfnRoute,
@@ -10,6 +10,7 @@ import {
 import { ManagedPolicy, Role } from '@aws-cdk/aws-iam';
 import { Topic } from '@aws-cdk/aws-sns';
 import { config } from './../config';
+import { ReadWriteDynamoDBTable } from '../policies';
 
 interface ViewsProps {
   api: CfnRefElement;
@@ -18,6 +19,7 @@ interface ViewsProps {
   topicRegion: string;
   tableName: string;
   apiUrl: string;
+  tablePermission?: boolean;
 }
 export class Views extends Construct {
   readonly viewsFunc: Function;
@@ -48,6 +50,11 @@ export class Views extends Construct {
     this.viewsFunc.role?.addManagedPolicy(
       ManagedPolicy.fromAwsManagedPolicyName('AmazonAPIGatewayInvokeFullAccess')
     );
+
+    // DynamoDB permissions
+    const tableArn = Fn.importValue(props.tableName + 'Arn');
+    const tablePolicy = ReadWriteDynamoDBTable([tableArn]);
+    props.tablePermission ? this.viewsFunc.addToRolePolicy(tablePolicy) : null;
 
     // Topic permission
     props.topic.grantPublish(this.viewsFunc);
