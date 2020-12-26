@@ -2,17 +2,19 @@
  * from DynamoDB stream and writes to a new table
  */
 import * as path from 'path';
-import { Construct, Duration } from '@aws-cdk/core';
+import { Construct, Duration, Fn } from '@aws-cdk/core';
 import { Code, Function, Runtime, StartingPosition } from '@aws-cdk/aws-lambda';
 import { DynamoEventSource, SqsDlq } from '@aws-cdk/aws-lambda-event-sources';
 import { Table } from '@aws-cdk/aws-dynamodb';
 import { Queue } from '@aws-cdk/aws-sqs';
+import { ReadWriteDynamoDBTable } from '../policies';
 
 interface StreamProps {
   lambdaDir: string;
   tableName: string;
   region: string;
   triggerSource: Table;
+  tablePermission?: boolean;
 }
 export class StreamHandler extends Construct {
   readonly lambda: Function;
@@ -30,6 +32,11 @@ export class StreamHandler extends Construct {
         TABLE_REGION: props.region,
       },
     });
+
+    // DynamoDB permissions
+    const tableArn = Fn.importValue(props.tableName + 'Arn');
+    const tablePolicy = ReadWriteDynamoDBTable([tableArn]);
+    props.tablePermission ? this.lambda.addToRolePolicy(tablePolicy) : null;
 
     // DLQ
     const dlq = new Queue(this, id + 'StreamsDLQ', {
