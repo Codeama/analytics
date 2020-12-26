@@ -23,7 +23,7 @@ interface ViewsProps {
 }
 export class Views extends Construct {
   readonly viewsFunc: Function;
-  private route: CfnRoute;
+  readonly route: CfnRoute;
   private lambdaIntegration: CfnIntegration;
 
   constructor(scope: Construct, id: string, props: ViewsProps) {
@@ -90,7 +90,4 @@ export class Views extends Construct {
       integrationResponseKey: '/200/',
     });
   }
-
-  getLambdaArn = () => this.viewsFunc.functionArn;
-  getRoute = () => this.route;
 }

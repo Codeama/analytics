@@ -15,8 +15,8 @@ interface DefaultProps {
   role: Role;
 }
 export class Default extends Construct {
-  private defaultFunc: Function;
-  private route: CfnRoute;
+  readonly defaultFunc: Function;
+  readonly route: CfnRoute;
   private lambdaIntegration: CfnIntegration;
 
   constructor(scope: Construct, id: string, props: DefaultProps) {
@@ -64,7 +64,4 @@ export class Default extends Construct {
       integrationResponseKey: '/200/',
     });
   }
-
-  getLambdaArn = () => this.defaultFunc.functionArn;
-  getRoute = () => this.route;
 }
