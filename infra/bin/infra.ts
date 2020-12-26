@@ -2,7 +2,7 @@
 import 'source-map-support/register';
 import * as cdk from '@aws-cdk/core';
 import { AnalyticsStack } from '../lib/analytics-stack';
-import { DatabaseStack } from './../lib/data/dynamodb-stack';
+import { DatabaseStack } from '../lib/data-store/dynamodb-stack';
 
 if (!process.env.NAMESPACE) {
   throw Error('NAMESPACE environment must be set.');

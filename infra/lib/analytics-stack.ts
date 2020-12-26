@@ -12,9 +12,7 @@ import { Views } from './routes/views';
 import { lambdaPolicy } from './policies';
 import { HitsHandler } from './subscriber';
 import { config } from './config';
-import { StreamViewType } from '@aws-cdk/aws-dynamodb';
-import { Store } from './data-store/table';
-import { StreamHandler } from './data-store/db-stream-lambda';
+
 export interface AnalyticsProps extends StackProps {
   namespace: string;
 }
@@ -29,7 +27,6 @@ export class AnalyticsStack extends Stack {
   private homeHitsHandler: HitsHandler;
   private profileHitsHandler: HitsHandler;
   private postHitsHandler: HitsHandler;
-  private streamHandler: StreamHandler;
 
   constructor(scope: Construct, id: string, props: AnalyticsProps) {
     super(scope, id, props);
@@ -49,7 +46,7 @@ export class AnalyticsStack extends Stack {
       assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
     });
 
-    // This is the URL that'll be generated after successful deployment of the API
+    // This is the URL that gets generated after successful deployment of the API
     // where stage name (see below) is this.namespace
     const url = `https://${this.api.ref}.execute-api.${config.AWS_REGION}.amazonaws.com/${this.namespace}`;
     this.viewsRouteKey = new Views(this, 'Views', {
@@ -77,8 +74,6 @@ export class AnalyticsStack extends Stack {
     this.createDeployment();
 
     this.createHitHandlers();
-
-    // this.createStorageTables();
   }
 
   // Bundles up the API resources for deployment
@@ -148,35 +143,4 @@ export class AnalyticsStack extends Stack {
     );
     this.snsTopic.addSubscription(profileSubscriber);
   };
-
-  // createStorageTables = () => {
-  //   const postWriterTable = new Store(this, this.namespace + 'WriterTable', {
-  //     tableName: config.POST_TABLE_WRITER,
-  //     indexName: 'articleId',
-  //     // Permission for post handler Lambda access
-  //     lambdaGrantee: this.postHitsHandler.subscribeFunc,
-  //     stream: StreamViewType.NEW_IMAGE,
-  //   });
-
-  //   // DynamoDB stream lambda function that writes to the PostCountReader table
-  //   // after being triggered by DynamoDB streams
-  //   this.streamHandler = new StreamHandler(
-  //     this,
-  //     this.namespace + 'StreamLambda',
-  //     {
-  //       lambdaDir: './../../../analytics-service/dynamo-stream/dist/main.zip',
-  //       tableName: config.POST_TABLE_READER,
-  //       region: config.AWS_REGION as string,
-  //       triggerSource: postWriterTable.table,
-  //     }
-  //   );
-
-  //   const postReaderTable = new Store(this, this.namespace + 'ReaderTable', {
-  //     tableName: config.POST_TABLE_READER,
-  //     indexName: 'articleId',
-  //     // Permission for dynamodb stream handler Lambda to write
-  //     lambdaGrantee: this.streamHandler.lambda,
-  //     readerGrantee: this.viewsRouteKey.viewsFunc,
-  //   });
-  // };
 }
