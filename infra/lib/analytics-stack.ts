@@ -65,8 +65,8 @@ export class AnalyticsStack extends Stack {
     });
 
     const policy = lambdaPolicy([
-      this.viewsRouteKey.getLambdaArn(),
-      this.defaultRouteKey.getLambdaArn(),
+      this.viewsRouteKey.viewsFunc.functionArn,
+      this.defaultRouteKey.defaultFunc.functionArn,
     ]);
 
     this.role.addToPolicy(policy);
@@ -90,8 +90,8 @@ export class AnalyticsStack extends Stack {
     });
 
     const dependencies = new ConcreteDependable();
-    dependencies.add(this.viewsRouteKey.getRoute());
-    dependencies.add(this.defaultRouteKey.getRoute());
+    dependencies.add(this.viewsRouteKey.route);
+    dependencies.add(this.defaultRouteKey.route);
     deployment.node.addDependency(dependencies);
   };
 
