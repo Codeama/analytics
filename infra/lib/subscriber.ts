@@ -4,7 +4,8 @@ import { Topic, SubscriptionFilter } from '@aws-cdk/aws-sns';
 import { Queue } from '@aws-cdk/aws-sqs';
 import { SqsSubscription } from '@aws-cdk/aws-sns-subscriptions';
 import { SqsEventSource } from '@aws-cdk/aws-lambda-event-sources';
-import { Construct, Duration } from '@aws-cdk/core';
+import { Construct, Duration, Fn } from '@aws-cdk/core';
+import { ReadWriteDynamoDBTable } from './policies';
 
 interface HandlerProps {
   name: string;
@@ -12,6 +13,7 @@ interface HandlerProps {
   topic: Topic;
   region: string;
   tableName: string;
+  tablePermission: boolean;
 }
 
 export class HitsHandler extends Construct {
@@ -32,6 +34,12 @@ export class HitsHandler extends Construct {
       },
     });
 
+    // DynamoDB permissions
+    const tableArn = Fn.importValue(props.tableName + 'Arn');
+    const tablePolicy = ReadWriteDynamoDBTable([tableArn]);
+    props.tablePermission
+      ? this.subscribeFunc.addToRolePolicy(tablePolicy)
+      : null;
     // DLQ
     const dlq = new Queue(this, id + 'DLQ', {
       queueName: id + 'DLQ',
