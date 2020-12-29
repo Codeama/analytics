@@ -101,9 +101,9 @@ export class AnalyticsStack extends Stack {
       name: this.namespace + 'homeQueueFunc',
       lambdaDir: './../../analytics-service/home-hits/dist/main.zip',
       topic: this.snsTopic,
-      tableName: '',
-      region: '',
-      tablePermission: false,
+      tableName: config.HOME_AND_PROFILE,
+      region: config.AWS_REGION as string,
+      tablePermission: true,
     });
 
     this.snsTopic.addSubscription(
@@ -132,9 +132,9 @@ export class AnalyticsStack extends Stack {
         name: this.namespace + 'profileQueueFunc',
         lambdaDir: './../../analytics-service/profile-hits/dist/main.zip',
         topic: this.snsTopic,
-        region: '',
-        tableName: '',
-        tablePermission: false,
+        region: config.AWS_REGION as string,
+        tableName: config.HOME_AND_PROFILE,
+        tablePermission: true,
       }
     );
 

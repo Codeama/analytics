@@ -40,6 +40,7 @@ export class HitsHandler extends Construct {
     props.tablePermission
       ? this.subscribeFunc.addToRolePolicy(tablePolicy)
       : null;
+
     // DLQ
     const dlq = new Queue(this, id + 'DLQ', {
       queueName: id + 'DLQ',
