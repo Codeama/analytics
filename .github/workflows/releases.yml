@@ -52,5 +52,7 @@ jobs:
         run: |
           cd infra
           npm install
+          cd -
           export NAMESPACE=prod
-          cdk deploy  --require-approval never
+          chmod +x ./deploy.sh
+          ./deploy.sh
