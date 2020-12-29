@@ -7,7 +7,6 @@ import { Code, Function, Runtime, StartingPosition } from '@aws-cdk/aws-lambda';
 import { DynamoEventSource, SqsDlq } from '@aws-cdk/aws-lambda-event-sources';
 import { Table } from '@aws-cdk/aws-dynamodb';
 import { Queue } from '@aws-cdk/aws-sqs';
-import { ReadWriteDynamoDBTable } from '../policies';
 
 interface StreamProps {
   lambdaDir: string;
@@ -32,11 +31,6 @@ export class StreamHandler extends Construct {
         TABLE_REGION: props.region,
       },
     });
-
-    // DynamoDB permissions
-    const tableArn = Fn.importValue(props.tableName + 'Arn');
-    const tablePolicy = ReadWriteDynamoDBTable([tableArn]);
-    props.tablePermission ? this.lambda.addToRolePolicy(tablePolicy) : null;
 
     // DLQ
     const dlq = new Queue(this, id + 'StreamsDLQ', {

@@ -10,7 +10,7 @@ import {
 import { ManagedPolicy, Role } from '@aws-cdk/aws-iam';
 import { Topic } from '@aws-cdk/aws-sns';
 import { config } from '../../config';
-import { ReadWriteDynamoDBTable } from '../../policies';
+import { ReadWriteDynamoDBTable } from '../policies';
 
 interface ViewsProps {
   api: CfnRefElement;
