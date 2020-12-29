@@ -87,7 +87,7 @@ func FilterData(data AnalyticsData) Event {
 	return article
 }
 
-// Tags received events that match type Page
+// Tags received events that qualify as Page
 func (data Page) tagEvent(eventTag string) (string, string) {
 	page := struct {
 		ConnectionID string
@@ -104,7 +104,7 @@ func (data Page) tagEvent(eventTag string) (string, string) {
 	return eventTag, string(result)
 }
 
-// Tags received events that match type Article
+// Tags received events that qualify as Article
 func (data Article) tagEvent(eventTag string) (string, string) {
 	post := struct {
 		ArticleID    string
