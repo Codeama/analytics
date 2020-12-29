@@ -47,7 +47,7 @@ func UpdateTable(data IncomingEvent) error {
 			TableName: aws.String(os.Getenv("TABLE_NAME")),
 			Key: map[string]*dynamodb.AttributeValue{
 				"pageName": {
-					S: aws.String("Homepage"),
+					S: aws.String("Home_Page"),
 				},
 			},
 			ReturnValues: aws.String("UPDATED_NEW"),
@@ -59,7 +59,7 @@ func UpdateTable(data IncomingEvent) error {
 		if err != nil {
 			return fmt.Errorf("Could not update table item: %v", err)
 		}
-		fmt.Println("Homepage item updated", response)
+		fmt.Println("Home_Page item updated", response)
 	}
 
 	return nil
