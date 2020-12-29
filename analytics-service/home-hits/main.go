@@ -1,19 +1,29 @@
-// home-hits is a Lambda subscriber function
-// to home SQS service
-// It processes and counts hits on the homepage
+// home-hits is Lambda that subscribes
+// to and reads messages from 'home' SQS service
+// It then processes and counts hits on the homepage
 package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/codeama/analytics/analytics-service/home-hits/store"
 )
 
 func handleQueueMessage(ctx context.Context, sqsEvent events.SQSEvent) error {
+	var viewData store.IncomingEvent
 	for _, message := range sqsEvent.Records {
-		fmt.Printf("The message %s for event source %s = %s \n", message.MessageId, message.EventSource, message.Body)
+		// serialise to Go struct
+		if err := json.Unmarshal([]byte(message.Body), &viewData); err != nil {
+			return fmt.Errorf("Could not deserialise data: %v", err)
+		}
+
+		if err := store.UpdateTable(viewData); err != nil {
+			fmt.Println(err)
+		}
 	}
 	return nil
 }

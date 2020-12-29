@@ -43,5 +43,15 @@ export class DatabaseStack extends Stack {
       tableName: config.POST_TABLE_READER,
       indexName: 'articleId',
     });
+
+    //
+    const homeAndProfileTable = new Store(
+      this,
+      this.namespace + 'HomeAndProfileTable',
+      {
+        tableName: config.HOME_AND_PROFILE,
+        indexName: 'pageName',
+      }
+    );
   };
 }
