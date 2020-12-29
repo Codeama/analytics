@@ -9,8 +9,8 @@ import {
 } from '@aws-cdk/aws-apigatewayv2';
 import { ManagedPolicy, Role } from '@aws-cdk/aws-iam';
 import { Topic } from '@aws-cdk/aws-sns';
-import { config } from './../config';
-import { ReadWriteDynamoDBTable } from '../policies';
+import { config } from '../../config';
+import { ReadWriteDynamoDBTable } from '../../policies';
 
 interface ViewsProps {
   api: CfnRefElement;
@@ -34,7 +34,7 @@ export class Views extends Construct {
       code: Code.fromAsset(
         path.join(
           __dirname,
-          '../../../analytics-service/views-stream/dist/main.zip'
+          '../../../../analytics-service/views-stream/dist/main.zip'
         )
       ),
       handler: 'main',
