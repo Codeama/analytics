@@ -7,7 +7,7 @@ import {
   CfnRouteResponse,
   CfnIntegrationResponse,
 } from '@aws-cdk/aws-apigatewayv2';
-import { config } from './../config';
+import { config } from '../../config';
 import { Role } from '@aws-cdk/aws-iam';
 
 interface DefaultProps {
@@ -27,7 +27,7 @@ export class Default extends Construct {
       code: Code.fromAsset(
         path.join(
           __dirname,
-          '../../../analytics-service/default-stream/dist/main.zip'
+          '../../../../analytics-service/default-stream/dist/main.zip'
         )
       ),
       handler: 'main',

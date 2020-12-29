@@ -9,14 +9,14 @@ import { CfnApi, CfnDeployment, CfnStage } from '@aws-cdk/aws-apigatewayv2';
 import { Topic } from '@aws-cdk/aws-sns';
 import { Default } from './routes/default';
 import { Views } from './routes/views';
-import { lambdaPolicy } from './policies';
+import { lambdaPolicy } from '../policies';
 import { HitsHandler } from './subscriber';
-import { config } from './config';
+import { config } from '../config';
 
-export interface AnalyticsProps extends StackProps {
+export interface ApiProps extends StackProps {
   namespace: string;
 }
-export class AnalyticsStack extends Stack {
+export class ApiStack extends Stack {
   private role: Role;
   private api: CfnApi;
   private namespace: string;
@@ -28,7 +28,7 @@ export class AnalyticsStack extends Stack {
   private profileHitsHandler: HitsHandler;
   private postHitsHandler: HitsHandler;
 
-  constructor(scope: Construct, id: string, props: AnalyticsProps) {
+  constructor(scope: Construct, id: string, props: ApiProps) {
     super(scope, id, props);
 
     this.namespace = props.namespace;
@@ -99,7 +99,7 @@ export class AnalyticsStack extends Stack {
     // HOME
     this.homeHitsHandler = new HitsHandler(this, this.namespace + 'homepage', {
       name: this.namespace + 'homeQueueFunc',
-      lambdaDir: './../../analytics-service/home-hits/dist/main.zip',
+      lambdaDir: '../../../analytics-service/home-hits/dist/main.zip',
       topic: this.snsTopic,
       tableName: config.HOME_AND_PROFILE,
       region: config.AWS_REGION as string,
@@ -113,7 +113,7 @@ export class AnalyticsStack extends Stack {
     // POST
     this.postHitsHandler = new HitsHandler(this, this.namespace + 'post', {
       name: this.namespace + 'postQueueFunc',
-      lambdaDir: './../../analytics-service/post-hits/dist/main.zip',
+      lambdaDir: '../../../analytics-service/post-hits/dist/main.zip',
       topic: this.snsTopic,
       tableName: config.POST_TABLE_WRITER,
       region: config.AWS_REGION as string,
@@ -130,7 +130,7 @@ export class AnalyticsStack extends Stack {
       this.namespace + 'profile',
       {
         name: this.namespace + 'profileQueueFunc',
-        lambdaDir: './../../analytics-service/profile-hits/dist/main.zip',
+        lambdaDir: '../../../analytics-service/profile-hits/dist/main.zip',
         topic: this.snsTopic,
         region: config.AWS_REGION as string,
         tableName: config.HOME_AND_PROFILE,

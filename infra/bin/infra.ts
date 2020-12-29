@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from '@aws-cdk/core';
-import { AnalyticsStack } from '../lib/analytics-stack';
+import { ApiStack } from '../lib/api/api-stack';
 import { DatabaseStack } from '../lib/data-store/dynamodb-stack';
 
 if (!process.env.NAMESPACE) {
@@ -26,7 +26,7 @@ new DatabaseStack(app, namespace + 'AnalyticsDataStore', {
 });
 
 // Creates the API stack
-new AnalyticsStack(app, namespace + 'AnalyticsApi', {
+new ApiStack(app, namespace + 'AnalyticsApi', {
   namespace,
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
