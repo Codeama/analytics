@@ -9,7 +9,7 @@ import { CfnApi, CfnDeployment, CfnStage } from '@aws-cdk/aws-apigatewayv2';
 import { Topic } from '@aws-cdk/aws-sns';
 import { Default } from './routes/default';
 import { Views } from './routes/views';
-import { lambdaPolicy } from '../policies';
+import { lambdaPolicy } from './policies';
 import { HitsHandler } from './subscriber';
 import { config } from '../config';
 

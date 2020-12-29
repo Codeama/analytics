@@ -5,7 +5,7 @@ import { Queue } from '@aws-cdk/aws-sqs';
 import { SqsSubscription } from '@aws-cdk/aws-sns-subscriptions';
 import { SqsEventSource } from '@aws-cdk/aws-lambda-event-sources';
 import { Construct, Duration, Fn } from '@aws-cdk/core';
-import { ReadWriteDynamoDBTable } from '../policies';
+import { ReadWriteDynamoDBTable } from './policies';
 
 interface HandlerProps {
   name: string;

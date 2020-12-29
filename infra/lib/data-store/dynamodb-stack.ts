@@ -35,16 +35,15 @@ export class DatabaseStack extends Stack {
         tableName: config.POST_TABLE_READER,
         region: config.AWS_REGION as string,
         triggerSource: postWriterTable.table,
-        tablePermission: true,
       }
     );
 
     const postReaderTable = new Store(this, this.namespace + 'ReaderTable', {
       tableName: config.POST_TABLE_READER,
       indexName: 'articleId',
+      lambdaGrantee: this.streamHandler.lambda, // grant streamHandler permission to write to this table
     });
 
-    //
     const homeAndProfileTable = new Store(
       this,
       this.namespace + 'HomeAndProfileTable',
