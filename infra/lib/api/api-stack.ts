@@ -4,7 +4,7 @@ import {
   StackProps,
   Stack,
 } from '@aws-cdk/core';
-import { Role, ServicePrincipal } from '@aws-cdk/aws-iam';
+import { ManagedPolicy, Role, ServicePrincipal } from '@aws-cdk/aws-iam';
 import { CfnApi, CfnDeployment, CfnStage } from '@aws-cdk/aws-apigatewayv2';
 import { Topic } from '@aws-cdk/aws-sns';
 import { Default } from './routes/default';
@@ -12,6 +12,8 @@ import { Views } from './routes/views';
 import { lambdaPolicy } from './policies';
 import { HitsHandler } from './subscriber';
 import { config } from '../config';
+import { LogGroup, RetentionDays } from '@aws-cdk/aws-logs';
+import { CfnAccount } from '@aws-cdk/aws-apigateway';
 
 export interface ApiProps extends StackProps {
   namespace: string;
@@ -27,11 +29,29 @@ export class ApiStack extends Stack {
   private homeHitsHandler: HitsHandler;
   private profileHitsHandler: HitsHandler;
   private postHitsHandler: HitsHandler;
+  private apiLogGroup: LogGroup;
 
   constructor(scope: Construct, id: string, props: ApiProps) {
     super(scope, id, props);
 
     this.namespace = props.namespace;
+
+    // Creates cloudwatch role for API Gateway
+
+    const cloudwatchRole = new Role(this, id + 'CloudWatchRole', {
+      assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
+      managedPolicies: [
+        ManagedPolicy.fromAwsManagedPolicyName(
+          'service-role/AmazonAPIGatewayPushToCloudWatchLogs'
+        ),
+      ],
+    });
+    // cloudwatchRole.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonAPIGatewayPushToCloudWatchLogs'));
+    // TODO create a policy and import it
+    const enableApiLogging = new CfnAccount(this, id + 'CloudWatch', {
+      cloudWatchRoleArn: cloudwatchRole.roleArn,
+    });
+
     this.snsTopic = new Topic(this, id + 'Topic', {
       topicName: this.namespace + id + 'Topic',
     });
@@ -44,6 +64,10 @@ export class ApiStack extends Stack {
 
     this.role = new Role(this, id + 'WebsocketRole', {
       assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
+    });
+
+    this.apiLogGroup = new LogGroup(this, id + 'WebSocketLogGoup', {
+      retention: RetentionDays.SIX_MONTHS,
     });
 
     // This is the URL that gets generated after successful deployment of the API
@@ -84,9 +108,14 @@ export class ApiStack extends Stack {
 
     new CfnStage(this, this.namespace + 'stage', {
       apiId: this.api.ref,
-      autoDeploy: true,
-      deploymentId: deployment.ref,
+      // autoDeploy: true, //changes to Stage constructs will not deploy unless autoDeploy is false
+      // deploymentId: deployment.ref,
       stageName: this.namespace,
+      accessLogSettings: {
+        destinationArn: this.apiLogGroup.logGroupArn,
+        format:
+          '{"requestId":"$context.requestId", "caller-domain":"$context.domainName", "user":"$context.identity.user","requestTime":"$context.requestTime", "eventType":"$context.eventType","routeKey":"$context.routeKey", "status":"$context.status","connectionId":"$context.connectionId"}',
+      },
     });
 
     const dependencies = new ConcreteDependable();
