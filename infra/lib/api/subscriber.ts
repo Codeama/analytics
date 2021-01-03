@@ -14,6 +14,7 @@ interface HandlerProps {
   region: string;
   tableName: string;
   tablePermission: boolean;
+  domainName: string;
 }
 
 export class HitsHandler extends Construct {
@@ -31,6 +32,7 @@ export class HitsHandler extends Construct {
         TOPIC_ARN: props.topic.topicArn,
         TABLE_REGION: props.region,
         TABLE_NAME: props.tableName,
+        DOMAIN_NAME: props.domainName as string,
       },
     });
 
