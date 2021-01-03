@@ -3,6 +3,7 @@ package process
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 )
@@ -15,6 +16,7 @@ type incomingEvent struct {
 	CurrentPage  string
 	EventType    string
 	ConnectionID string
+	Referrer     string
 }
 
 // ProcessedEvent is the result returned after counting
@@ -22,15 +24,16 @@ type ProcessedEvent struct {
 	ArticleID    string
 	ArticleTitle string
 	UniqueViews  int
-	TotalViews   int // includes a count of non-unique views
+	TotalViews   int // sum total of all views unique or not
 }
 
 // Checks if event is a unique view of post/article
-func isUnique(previousPage string, currentPage string) bool {
-	// UNIQUE: if currentPage is not a / and previousPage is not null
-	if previousPage != "null" {
+func isUnique(previousPage string, referrer string) bool {
+	// UNIQUE: if previousPage is not null OR if previousPage is null and referrer is not current domain
+	if previousPage != "null" || previousPage == "null" && referrer != os.Getenv("DOMAIN_NAME") {
 		return true
 	}
+
 	return false
 }
 
@@ -51,8 +54,7 @@ func CountViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
 		}
 		// checks current article has a view value
 		_, hasViews := totalViews[data.ArticleID]
-		// _, hasUniqueViews := uniqueViews[data.ArticleID]
-		// checks article is already in map (it should be)
+		// checks article is already in map (it should be; see else statement below that runs at least once for all inicoming data)
 		// then updates it (deletes and replaces with article item
 		// with the latest view count)
 		_, exists := mappedArt[data.ArticleID]
@@ -60,7 +62,7 @@ func CountViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
 			delete(mappedArt, data.ArticleID)
 
 			// process unique views
-			unique := isUnique(data.PreviousPage, data.CurrentPage)
+			unique := isUnique(data.PreviousPage, data.Referrer)
 			if unique {
 				uniqueViews[data.ArticleID]++
 			}
@@ -76,7 +78,7 @@ func CountViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
 			// update article values
 			mappedArt[data.ArticleID] = processed
 		} else {
-			unique := isUnique(data.PreviousPage, data.CurrentPage)
+			unique := isUnique(data.PreviousPage, data.Referrer)
 			// process unique views
 			if unique {
 				uniqueViews[data.ArticleID] = 1
