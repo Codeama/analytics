@@ -74,10 +74,7 @@ export class ApiStack extends Stack {
     this.connectRouteKey = new Connection(this, 'Connect', {
       api: this.api,
       role: this.role,
-      region: config.AWS_REGION as string,
       domainName: config.DOMAIN_NAME as string,
-      tableName: config.REFERRER_TABLE,
-      tablePermission: true,
     });
 
     // This is the URL that gets generated after successful deployment of the API
@@ -88,7 +85,8 @@ export class ApiStack extends Stack {
       role: this.role,
       topic: this.snsTopic,
       topicRegion: config.AWS_REGION as string,
-      tableName: config.POST_TABLE_READER,
+      postTableName: config.POST_TABLE_READER,
+      referrerTableName: config.REFERRER_TABLE,
       connectionUrl: url,
       tablePermission: true,
     });

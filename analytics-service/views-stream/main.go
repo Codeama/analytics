@@ -65,7 +65,6 @@ func handleRequest(ctx context.Context, request events.APIGatewayWebsocketProxyR
 	var data process.IncomingData
 
 	// If error, return as data is useless
-	// You give nothing, you get nothing >.<
 	if err := json.Unmarshal([]byte(request.Body), &data); err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: 400}, fmt.Errorf("Error: %v", err)
 	}
@@ -107,6 +106,19 @@ func handleRequest(ctx context.Context, request events.APIGatewayWebsocketProxyR
 			sendStats(views, session, request.RequestContext.ConnectionID)
 		}
 
+	}
+
+	// Store external referrer URL
+	referrer := process.AnalyticsData{
+		ArticleID:    data.ArticleID,
+		ArticleTitle: data.ArticleTitle,
+		CurrentPage:  data.CurrentPage,
+		PreviousPage: data.PreviousPage,
+		ConnectionID: request.RequestContext.ConnectionID,
+		Referrer:     data.Referrer,
+	}
+	if err := store.UpdateReferrerTable(referrer); err != nil {
+		fmt.Println("Can't update referrer: ", err)
 	}
 
 	return events.APIGatewayProxyResponse{

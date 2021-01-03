@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
@@ -18,28 +17,16 @@ type ArticleViews struct {
 	UniqueViews int `json:"uniqueViews"`
 }
 
-// getClient creates a dynamodb client to connect to acsess the datastore
-func getClient() (*dynamodb.DynamoDB, error) {
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(os.Getenv("TABLE_REGION")),
-	})
-	if err != nil {
-		return nil, fmt.Errorf("Could not create a new session: %v", err)
-	}
-
-	return dynamodb.New(sess), nil
-}
-
 // GetArticleViews queries the article table and returns
 // the value of total views for an article
 func GetArticleViews(articleID string) (ArticleViews, error) {
-	client, err := getClient()
+	client, err := GetClient()
 	if err != nil {
 		return ArticleViews{}, fmt.Errorf("Error: %v", err)
 	}
 
 	input := &dynamodb.GetItemInput{
-		TableName: aws.String(os.Getenv("TABLE_NAME")),
+		TableName: aws.String(os.Getenv("POST_TABLE_NAME")),
 		Key: map[string]*dynamodb.AttributeValue{
 			"articleId": {
 				S: aws.String(articleID),

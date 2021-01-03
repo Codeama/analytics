@@ -52,5 +52,10 @@ export class DatabaseStack extends Stack {
         indexName: 'pageName',
       }
     );
+
+    const referrerTable = new Store(this, this.namespace + 'ReferrerTable', {
+      tableName: config.REFERRER_TABLE,
+      indexName: 'id',
+    });
   };
 }
