@@ -14,6 +14,7 @@ import { HitsHandler } from './subscriber';
 import { config } from '../config';
 import { LogGroup, RetentionDays } from '@aws-cdk/aws-logs';
 import { CfnAccount } from '@aws-cdk/aws-apigateway';
+import { Connection } from './routes/connect';
 
 export interface ApiProps extends StackProps {
   namespace: string;
@@ -22,6 +23,7 @@ export class ApiStack extends Stack {
   private role: Role;
   private api: CfnApi;
   private namespace: string;
+  private connectRouteKey: Connection;
   private viewsRouteKey: Views;
   private defaultRouteKey: Default;
   // The SNS topic for hit counter lambdas to subscribe to
@@ -46,8 +48,7 @@ export class ApiStack extends Stack {
         ),
       ],
     });
-    // cloudwatchRole.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonAPIGatewayPushToCloudWatchLogs'));
-    // TODO create a policy and import it
+
     const enableApiLogging = new CfnAccount(this, id + 'CloudWatch', {
       cloudWatchRoleArn: cloudwatchRole.roleArn,
     });
@@ -70,6 +71,15 @@ export class ApiStack extends Stack {
       retention: RetentionDays.SIX_MONTHS,
     });
 
+    this.connectRouteKey = new Connection(this, 'Connect', {
+      api: this.api,
+      role: this.role,
+      region: config.AWS_REGION as string,
+      domainName: config.DOMAIN_NAME as string,
+      tableName: config.REFERRER_TABLE,
+      tablePermission: true,
+    });
+
     // This is the URL that gets generated after successful deployment of the API
     // where stage name (see below) is this.namespace
     const url = `https://${this.api.ref}.execute-api.${config.AWS_REGION}.amazonaws.com/${this.namespace}`;
@@ -79,7 +89,7 @@ export class ApiStack extends Stack {
       topic: this.snsTopic,
       topicRegion: config.AWS_REGION as string,
       tableName: config.POST_TABLE_READER,
-      apiUrl: url,
+      connectionUrl: url,
       tablePermission: true,
     });
 
@@ -89,6 +99,7 @@ export class ApiStack extends Stack {
     });
 
     const policy = lambdaPolicy([
+      this.connectRouteKey.connectFunc.functionArn,
       this.viewsRouteKey.viewsFunc.functionArn,
       this.defaultRouteKey.defaultFunc.functionArn,
     ]);
@@ -147,6 +158,7 @@ export class ApiStack extends Stack {
       tableName: config.POST_TABLE_WRITER,
       region: config.AWS_REGION as string,
       tablePermission: true,
+      domainName: config.DOMAIN_NAME as string,
     });
 
     this.snsTopic.addSubscription(
