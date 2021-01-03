@@ -43,7 +43,7 @@ func getSNSService(session *session.Session) *sns.SNS {
 func sendStats(data store.ArticleViews, session *session.Session, connection string) {
 
 	apigw := apigatewaymanagementapi.New(session, &aws.Config{
-		Endpoint: aws.String(os.Getenv("API_URL")),
+		Endpoint: aws.String(os.Getenv("CONNECTION_URL")),
 	})
 
 	viewsStats, err := json.Marshal(data)
