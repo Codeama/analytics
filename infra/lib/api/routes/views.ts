@@ -17,7 +17,8 @@ interface ViewsProps {
   role: Role;
   topic: Topic;
   topicRegion: string;
-  tableName: string;
+  postTableName: string;
+  referrerTableName: string;
   connectionUrl: string;
   tablePermission?: boolean;
 }
@@ -41,7 +42,8 @@ export class Views extends Construct {
       environment: {
         TOPIC_ARN: props.topic.topicArn,
         TOPIC_REGION: props.topicRegion,
-        TABLE_NAME: props.tableName,
+        POST_TABLE_NAME: props.postTableName,
+        REFERRER_TABLE_NAME: props.referrerTableName,
         CONNECTION_URL: props.connectionUrl,
       },
     });
@@ -53,8 +55,12 @@ export class Views extends Construct {
     );
 
     // DynamoDB permissions
-    const tableArn = Fn.importValue(props.tableName + 'Arn');
-    const tablePolicy = ReadWriteDynamoDBTable([tableArn]);
+    const postTableArn = Fn.importValue(props.postTableName + 'Arn');
+    const referrerTableArn = Fn.importValue(props.postTableName + 'Arn');
+    const tablePolicy = ReadWriteDynamoDBTable([
+      postTableArn,
+      referrerTableArn,
+    ]);
     props.tablePermission ? this.viewsFunc.addToRolePolicy(tablePolicy) : null;
 
     // Topic permission
