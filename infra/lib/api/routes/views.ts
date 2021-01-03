@@ -18,7 +18,7 @@ interface ViewsProps {
   topic: Topic;
   topicRegion: string;
   tableName: string;
-  apiUrl: string;
+  connectionUrl: string;
   tablePermission?: boolean;
 }
 export class Views extends Construct {
@@ -42,11 +42,12 @@ export class Views extends Construct {
         TOPIC_ARN: props.topic.topicArn,
         TOPIC_REGION: props.topicRegion,
         TABLE_NAME: props.tableName,
-        API_URL: props.apiUrl,
+        CONNECTION_URL: props.connectionUrl,
       },
     });
 
-    // Grant API invoke permission to lambda
+    // Grant API invoke permission to lambda for calls to the connectionUrl to
+    // be able to communicate back to connected clients
     this.viewsFunc.role?.addManagedPolicy(
       ManagedPolicy.fromAwsManagedPolicyName('AmazonAPIGatewayInvokeFullAccess')
     );
