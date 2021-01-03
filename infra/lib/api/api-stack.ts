@@ -144,6 +144,7 @@ export class ApiStack extends Stack {
       tableName: config.HOME_AND_PROFILE,
       region: config.AWS_REGION as string,
       tablePermission: true,
+      domainName: config.DOMAIN_NAME,
     });
 
     this.snsTopic.addSubscription(
@@ -176,6 +177,7 @@ export class ApiStack extends Stack {
         region: config.AWS_REGION as string,
         tableName: config.HOME_AND_PROFILE,
         tablePermission: true,
+        domainName: config.DOMAIN_NAME,
       }
     );
 
