@@ -12,7 +12,7 @@ import (
 func handleRequest(ctx context.Context, request events.APIGatewayWebsocketProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	return events.APIGatewayProxyResponse{
-		Body:       string(fmt.Sprintln("Hello, from default Lambda!")),
+		Body:       string(fmt.Sprintln("Hello!!! Nothing to see here!")),
 		StatusCode: 200,
 	}, nil
 }
