@@ -17,6 +17,7 @@ analytics-service/home-hits
 analytics-service/post-hits
 analytics-service/profile-hits
 analytics-service/dynamo-stream
+analytics-service/connect
 "
 
 # Build and package Go Lambda binaries
