@@ -17,6 +17,7 @@ type Page struct {
 	PreviousPage string
 	CurrentPage  string
 	ConnectionID string
+	Referrer     string
 }
 
 // Article represents post view data
@@ -32,6 +33,7 @@ type IncomingData struct {
 	ArticleTitle string `json:"articleTitle,omitempty"`
 	PreviousPage string `json:"previousPage"`
 	CurrentPage  string `json:"currentPage"`
+	Referrer     string `json:"referrer"`
 }
 
 // AnalyticsData represents input data expected
@@ -41,6 +43,7 @@ type AnalyticsData struct {
 	PreviousPage string
 	CurrentPage  string
 	ConnectionID string
+	Referrer     string
 }
 
 // ValidateData validates and stores incoming data in an struct
@@ -55,13 +58,14 @@ func ValidateData(data IncomingData, id string) (AnalyticsData, error) {
 		return AnalyticsData{}, fmt.Errorf("Event does not contain required page data")
 	}
 
-	// return received data in a digestable struct
+	// map and return received data to a struct
 	return AnalyticsData{
 		data.ArticleID,
 		data.ArticleTitle,
 		data.PreviousPage,
 		data.CurrentPage,
 		id,
+		data.Referrer,
 	}, nil
 
 }
@@ -75,6 +79,7 @@ func FilterData(data AnalyticsData) Event {
 		page.ConnectionID = data.ConnectionID
 		page.PreviousPage = data.PreviousPage
 		page.CurrentPage = data.CurrentPage
+		page.Referrer = data.Referrer
 		return page
 	}
 
@@ -84,6 +89,7 @@ func FilterData(data AnalyticsData) Event {
 	article.PreviousPage = data.PreviousPage
 	article.CurrentPage = data.CurrentPage
 	article.ConnectionID = data.ConnectionID
+	article.Referrer = data.Referrer
 	return article
 }
 
@@ -93,11 +99,13 @@ func (data Page) tagEvent(eventTag string) (string, string) {
 		ConnectionID string
 		CurrentPage  string
 		PreviousPage string
+		Referrer     string
 		EventType    string
 	}{
 		data.ConnectionID,
 		data.CurrentPage,
 		data.PreviousPage,
+		data.Referrer,
 		eventTag,
 	}
 	result, _ := json.Marshal(page)
@@ -112,6 +120,7 @@ func (data Article) tagEvent(eventTag string) (string, string) {
 		ConnectionID string
 		CurrentPage  string
 		PreviousPage string
+		Referrer     string
 		EventType    string
 	}{
 		data.ArticleID,
@@ -119,6 +128,7 @@ func (data Article) tagEvent(eventTag string) (string, string) {
 		data.Page.ConnectionID,
 		data.Page.CurrentPage,
 		data.Page.PreviousPage,
+		data.Page.Referrer,
 		eventTag,
 	}
 	result, _ := json.Marshal(post)
