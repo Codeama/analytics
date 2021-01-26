@@ -3,7 +3,6 @@ package process
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 )
@@ -14,6 +13,7 @@ type incomingEvent struct {
 	ArticleTitle string
 	PreviousPage string
 	CurrentPage  string
+	Refreshed    bool
 	EventType    string
 	ConnectionID string
 	Referrer     string
@@ -25,16 +25,6 @@ type ProcessedEvent struct {
 	ArticleTitle string
 	UniqueViews  int
 	TotalViews   int // sum total of all views unique or not
-}
-
-// Checks if event is a unique view of post/article
-func isUnique(previousPage string, referrer string) bool {
-	// UNIQUE: if previousPage is not null OR if previousPage is null and referrer is not current domain
-	if previousPage != "null" || previousPage == "null" && referrer != os.Getenv("DOMAIN_NAME") {
-		return true
-	}
-
-	return false
 }
 
 // CountViews totals the number of views for each article
@@ -49,21 +39,20 @@ func CountViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
 	for _, message := range sqsEvent.Records {
 		// serialise to Go struct
 		if err := json.Unmarshal([]byte(message.Body), &data); err != nil {
-			// fmt.Println("Could not deserialise data: ", err)
 			return nil, fmt.Errorf("Could not deserialise data: %v", err)
 		}
 		// checks current article has a view value
 		_, hasViews := totalViews[data.ArticleID]
-		// checks article is already in map (it should be; see else statement below that runs at least once for all inicoming data)
+		// checks article is already in map (it should be; see else statement below that runs at least once for all incoming data)
 		// then updates it (deletes and replaces with article item
 		// with the latest view count)
-		_, exists := mappedArt[data.ArticleID]
+		v, exists := mappedArt[data.ArticleID]
+		fmt.Printf("Existing article: %v", v)
 		if hasViews && exists {
 			delete(mappedArt, data.ArticleID)
 
 			// process unique views
-			unique := isUnique(data.PreviousPage, data.Referrer)
-			if unique {
+			if !data.Refreshed {
 				uniqueViews[data.ArticleID]++
 			}
 			// process all views
@@ -78,9 +67,8 @@ func CountViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
 			// update article values
 			mappedArt[data.ArticleID] = processed
 		} else {
-			unique := isUnique(data.PreviousPage, data.Referrer)
 			// process unique views
-			if unique {
+			if !data.Refreshed {
 				uniqueViews[data.ArticleID] = 1
 			} else {
 				uniqueViews[data.ArticleID] = 0

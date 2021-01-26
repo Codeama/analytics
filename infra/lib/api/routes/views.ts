@@ -9,18 +9,19 @@ import {
 } from '@aws-cdk/aws-apigatewayv2';
 import { ManagedPolicy, Role } from '@aws-cdk/aws-iam';
 import { Topic } from '@aws-cdk/aws-sns';
-import { config } from '../../config';
+import { config } from '../../../config';
 import { ReadWriteDynamoDBTable } from '../policies';
 
 interface ViewsProps {
   api: CfnRefElement;
   role: Role;
   topic: Topic;
-  topicRegion: string;
+  region: string;
   postTableName: string;
   referrerTableName: string;
   connectionUrl: string;
   tablePermission?: boolean;
+  domainName: string;
 }
 export class Views extends Construct {
   readonly viewsFunc: Function;
@@ -41,10 +42,11 @@ export class Views extends Construct {
       handler: 'main',
       environment: {
         TOPIC_ARN: props.topic.topicArn,
-        TOPIC_REGION: props.topicRegion,
+        REGION: props.region,
         POST_TABLE_NAME: props.postTableName,
         REFERRER_TABLE_NAME: props.referrerTableName,
         CONNECTION_URL: props.connectionUrl,
+        DOMAIN_NAME: props.domainName,
       },
     });
 
@@ -56,7 +58,7 @@ export class Views extends Construct {
 
     // DynamoDB permissions
     const postTableArn = Fn.importValue(props.postTableName + 'Arn');
-    const referrerTableArn = Fn.importValue(props.postTableName + 'Arn');
+    const referrerTableArn = Fn.importValue(props.referrerTableName + 'Arn');
     const tablePolicy = ReadWriteDynamoDBTable([
       postTableArn,
       referrerTableArn,

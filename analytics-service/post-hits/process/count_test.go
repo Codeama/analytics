@@ -3,7 +3,6 @@ package process
 import (
 	"encoding/json"
 	"io/ioutil"
-	"os"
 	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -15,31 +14,31 @@ import (
 var mockViewCountResult = map[string]ProcessedEvent{
 	"testArticleID": ProcessedEvent{
 		ArticleID:    "testArticleID",
-		ArticleTitle: "Test Title",
-		UniqueViews:  3,
+		ArticleTitle: "Test Title 1",
+		UniqueViews:  1,
 		TotalViews:   4,
 	},
 	"testArticleID2": ProcessedEvent{
 		ArticleID:    "testArticleID2",
-		ArticleTitle: "Test Title",
-		UniqueViews:  1,
+		ArticleTitle: "Test Title 2",
+		UniqueViews:  0,
 		TotalViews:   1,
 	},
 	"testArticleID3": ProcessedEvent{
 		ArticleID:    "testArticleID3",
-		ArticleTitle: "Test Title",
-		UniqueViews:  3,
+		ArticleTitle: "Test Title 3",
+		UniqueViews:  2,
 		TotalViews:   3,
 	},
 	"testArticleID4": ProcessedEvent{
 		ArticleID:    "testArticleID4",
-		ArticleTitle: "Test Title",
+		ArticleTitle: "Test Title 4",
 		UniqueViews:  1,
 		TotalViews:   1,
 	},
 	"testArticleID5": ProcessedEvent{
 		ArticleID:    "testArticleID5",
-		ArticleTitle: "Test Title",
+		ArticleTitle: "Test Title 5",
 		UniqueViews:  1,
 		TotalViews:   2,
 	},
@@ -49,31 +48,31 @@ var mockViewCountResult = map[string]ProcessedEvent{
 var mockPostResult = []ProcessedEvent{
 	{
 		ArticleID:    "testArticleID",
-		ArticleTitle: "Test Title",
+		ArticleTitle: "Test Title 1",
 		UniqueViews:  2,
 		TotalViews:   4,
 	},
 	{
 		ArticleID:    "testArticleID2",
-		ArticleTitle: "Test Title",
-		UniqueViews:  1,
+		ArticleTitle: "Test Title 2",
+		UniqueViews:  0,
 		TotalViews:   1,
 	},
 	{
 		ArticleID:    "testArticleID3",
-		ArticleTitle: "Test Title",
-		UniqueViews:  3,
+		ArticleTitle: "Test Title 3",
+		UniqueViews:  2,
 		TotalViews:   3,
 	},
 	{
 		ArticleID:    "testArticleID4",
-		ArticleTitle: "Test Title",
+		ArticleTitle: "Test Title 4",
 		UniqueViews:  1,
 		TotalViews:   1,
 	},
 	{
 		ArticleID:    "testArticleID5",
-		ArticleTitle: "Test Title",
+		ArticleTitle: "Test Title 5",
 		UniqueViews:  1,
 		TotalViews:   2,
 	},
@@ -81,8 +80,6 @@ var mockPostResult = []ProcessedEvent{
 
 // 1. It should count all views (total and unique) for each article and return an array/slice of the articles and their stats
 func TestCountViews(t *testing.T) {
-	// Set domain name
-	os.Setenv("DOMAIN_NAME", "https://example.com")
 	inputJSON, err := ioutil.ReadFile("../testdata/article-events.json")
 	if err != nil {
 		t.Errorf("could not read test data")

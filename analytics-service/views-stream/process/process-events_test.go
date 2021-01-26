@@ -18,31 +18,37 @@ var mockArticleData = AnalyticsData{
 	ArticleTitle: "Unit Testing Go Functions",
 	PreviousPage: "/",
 	CurrentPage:  "/posts/unit-testing-go-functions",
+	Refreshed:    false,
 }
 
 var mockHomePageData = AnalyticsData{
 	PreviousPage: "null",
 	CurrentPage:  "/",
+	Refreshed:    false,
 }
 
 var mockHomePage = Page{
 	PreviousPage: "null",
 	CurrentPage:  "/",
+	Refreshed:    false,
 }
 
 var mockAboutMePage = Page{
 	PreviousPage: "/",
 	CurrentPage:  "/pages/about",
+	Refreshed:    false,
 }
 
 var mockContactMePage = Page{
 	PreviousPage: "/",
 	CurrentPage:  "/pages/contacts",
+	Refreshed:    false,
 }
 
 var mockPageDataError = Page{
 	PreviousPage: "/",
 	CurrentPage:  "/me/about",
+	Refreshed:    false,
 }
 
 var mockArticlePage = Article{
@@ -51,6 +57,7 @@ var mockArticlePage = Article{
 	Page: Page{
 		PreviousPage: "/",
 		CurrentPage:  "/posts/unit-testing-go-functions",
+		Refreshed:    false,
 	},
 }
 
@@ -66,31 +73,42 @@ var mockArticlePageError = Article{
 var incomingData = IncomingData{
 	PreviousPage: "/mypage",
 	CurrentPage:  "/posts/hello-world",
+	Refreshed:    false,
 }
 
 var incomingNoPageData = IncomingData{
 	PreviousPage: "",
 	CurrentPage:  "/posts/hello-world",
+	Refreshed:    false,
 }
 
 func TestValidateData(t *testing.T) {
 	id := "testId"
-	var mockResult = AnalyticsData{
+
+	expected := AnalyticsData{
 		"",
 		"",
 		incomingData.PreviousPage,
 		incomingData.CurrentPage,
 		id,
+		false,
 		incomingData.Referrer,
 	}
-	data, err := ValidateData(incomingData, id)
-	assert.Equal(t, mockResult, data, "It should return AnalyticsData struct")
-	assert.Equal(t, err, nil, "Error should be nil value")
+
+	actual, err := ValidateData(incomingData, id)
+	if actual != expected {
+		t.Errorf("\n%+v is not of AnalyticsData type", actual)
+	}
+
+	if err != nil {
+		t.Errorf("ValidateData(%v, %v) returned an error: %v", incomingData, id, err)
+	}
+
 }
 
 func TestInValidData(t *testing.T) {
-	data, err := ValidateData(incomingData, "")
-	assert.Equal(t, AnalyticsData{}, data, "It should return empty AnalyticsData value")
+	actualResult, err := ValidateData(incomingData, "")
+	assert.Equal(t, AnalyticsData{}, actualResult, "It should return empty AnalyticsData value")
 	assert.NotNil(t, err, "It should return an error")
 }
 
@@ -113,28 +131,28 @@ func TestFilterDataPage(t *testing.T) {
 }
 
 func TestSortHome(t *testing.T) {
-	var mockJSONHomePage = `{"ConnectionID":"","CurrentPage":"/","PreviousPage":"null","Referrer":"","EventType":"homepage_view"}`
+	var mockJSONHomePage = `{"ConnectionID":"","CurrentPage":"/","PreviousPage":"null","Refreshed":false,"Referrer":"","EventType":"homepage_view"}`
 	tag, data, _ := Sort(mockHomePage)
 	assert.Equal(t, "homepage_view", tag, "Event tag should be 'homepage_view'")
 	assert.Equal(t, string(mockJSONHomePage), data, "It should return a JSON string")
 }
 
 func TestSortAbout(t *testing.T) {
-	var mockJSONAboutMePage = `{"ConnectionID":"","CurrentPage":"/pages/about","PreviousPage":"/","Referrer":"","EventType":"about_view"}`
+	var mockJSONAboutMePage = `{"ConnectionID":"","CurrentPage":"/pages/about","PreviousPage":"/","Refreshed":false,"Referrer":"","EventType":"about_view"}`
 	tag, data, _ := Sort(mockAboutMePage)
 	assert.Equal(t, "about_view", tag, "Event tag should be 'about_view'")
 	assert.Equal(t, string(mockJSONAboutMePage), data, "It should return a JSON string")
 }
 
 func TestSortContact(t *testing.T) {
-	var mockJSONContactMePage = `{"ConnectionID":"","CurrentPage":"/pages/contacts","PreviousPage":"/","Referrer":"","EventType":"contact_view"}`
+	var mockJSONContactMePage = `{"ConnectionID":"","CurrentPage":"/pages/contacts","PreviousPage":"/","Refreshed":false,"Referrer":"","EventType":"contact_view"}`
 	tag, data, _ := Sort(mockContactMePage)
 	assert.Equal(t, "contact_view", tag, "Event tag should be 'contact_view'")
 	assert.Equal(t, string(mockJSONContactMePage), data, "It should return a JSON string")
 }
 
 func TestSortArticle(t *testing.T) {
-	var mockJSONArticlePage = `{"ArticleID":"123testId","ArticleTitle":"Unit Testing Go Functions","ConnectionID":"","CurrentPage":"/posts/unit-testing-go-functions","PreviousPage":"/","Referrer":"","EventType":"post_view"}`
+	var mockJSONArticlePage = `{"ArticleID":"123testId","ArticleTitle":"Unit Testing Go Functions","ConnectionID":"","CurrentPage":"/posts/unit-testing-go-functions","PreviousPage":"/","Refreshed":false,"Referrer":"","EventType":"post_view"}`
 	tag, data, _ := Sort(mockArticlePage)
 	assert.Equal(t, "post_view", tag, "Event tag should be 'post_view'")
 	assert.Equal(t, string(mockJSONArticlePage), data, "It should return a JSON string")
