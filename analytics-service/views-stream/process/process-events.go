@@ -12,11 +12,12 @@ type Event interface {
 	tagEvent(tag string) (string, string)
 }
 
-// Page represent structure all incoming data should have
+// Page represent structure of incoming page view data
 type Page struct {
 	PreviousPage string
 	CurrentPage  string
 	ConnectionID string
+	Refreshed    bool
 	Referrer     string
 }
 
@@ -27,22 +28,24 @@ type Article struct {
 	Page
 }
 
-// IncomingData represents data event received
+// IncomingData represents page view event received
 type IncomingData struct {
 	ArticleID    string `json:"articleId,omitempty"`
 	ArticleTitle string `json:"articleTitle,omitempty"`
 	PreviousPage string `json:"previousPage"`
 	CurrentPage  string `json:"currentPage"`
+	Refreshed    bool   `json:"refreshed"`
 	Referrer     string `json:"referrer"`
 }
 
-// AnalyticsData represents input data expected
+// AnalyticsData is transformed data from IncomingData
 type AnalyticsData struct {
 	ArticleID    string
 	ArticleTitle string
 	PreviousPage string
 	CurrentPage  string
 	ConnectionID string
+	Refreshed    bool
 	Referrer     string
 }
 
@@ -65,6 +68,7 @@ func ValidateData(data IncomingData, id string) (AnalyticsData, error) {
 		data.PreviousPage,
 		data.CurrentPage,
 		id,
+		data.Refreshed,
 		data.Referrer,
 	}, nil
 
@@ -79,6 +83,7 @@ func FilterData(data AnalyticsData) Event {
 		page.ConnectionID = data.ConnectionID
 		page.PreviousPage = data.PreviousPage
 		page.CurrentPage = data.CurrentPage
+		page.Refreshed = data.Refreshed
 		page.Referrer = data.Referrer
 		return page
 	}
@@ -89,6 +94,7 @@ func FilterData(data AnalyticsData) Event {
 	article.PreviousPage = data.PreviousPage
 	article.CurrentPage = data.CurrentPage
 	article.ConnectionID = data.ConnectionID
+	article.Refreshed = data.Refreshed
 	article.Referrer = data.Referrer
 	return article
 }
@@ -99,12 +105,14 @@ func (data Page) tagEvent(eventTag string) (string, string) {
 		ConnectionID string
 		CurrentPage  string
 		PreviousPage string
+		Refreshed    bool
 		Referrer     string
 		EventType    string
 	}{
 		data.ConnectionID,
 		data.CurrentPage,
 		data.PreviousPage,
+		data.Refreshed,
 		data.Referrer,
 		eventTag,
 	}
@@ -120,6 +128,7 @@ func (data Article) tagEvent(eventTag string) (string, string) {
 		ConnectionID string
 		CurrentPage  string
 		PreviousPage string
+		Refreshed    bool
 		Referrer     string
 		EventType    string
 	}{
@@ -128,6 +137,7 @@ func (data Article) tagEvent(eventTag string) (string, string) {
 		data.Page.ConnectionID,
 		data.Page.CurrentPage,
 		data.Page.PreviousPage,
+		data.Page.Refreshed,
 		data.Page.Referrer,
 		eventTag,
 	}
@@ -137,7 +147,7 @@ func (data Article) tagEvent(eventTag string) (string, string) {
 
 // Sort processes and tags received events for publishing to SNS
 // Identifies page url, tags it, marshals it and
-// returns the tag and json data (eventTag, data)
+// returns the tag and json formatted data (eventTag, data)
 func Sort(data Event) (string, string, error) {
 	switch data.(type) {
 	case Page:

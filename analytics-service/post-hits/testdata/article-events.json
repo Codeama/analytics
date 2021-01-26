@@ -3,7 +3,7 @@
     {
       "messageId": "MessageID_1",
       "receiptHandle": "MessageReceiptHandle",
-      "body": "{\"ArticleID\":\"testArticleID\", \"ArticleTitle\":\"Test Title\",\"PreviousPage\": \"null\",\"CurrentPage\": \"/posts/test-title\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId1\",\"Referrer\":\"https://example.com\"}",
+      "body": "{\"ArticleID\":\"testArticleID\", \"ArticleTitle\":\"Test Title\",\"PreviousPage\": \"null\",\"CurrentPage\": \"/posts/test-title\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId1\", \"Refreshed\":false,\"Referrer\":\"https://example.com\"}",
       "md5OfBody": "fce0ea8dd236ccb3ed9b37dae260836f",
       "md5OfMessageAttributes": "582c92c5c5b6ac403040a4f3ab3115c9",
       "eventSourceARN": "arn:aws:sqs:us-west-2:123456789012:SQSQueue",
@@ -39,7 +39,7 @@
     {
       "messageId": "MessageID_2",
       "receiptHandle": "MessageReceiptHandle",
-      "body": "{\"ArticleID\":\"testArticleID\", \"ArticleTitle\":\"Test Title\",\"PreviousPage\": \"/\",\"CurrentPage\": \"/posts/test-title\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId2\",\"Referrer\":\"https://example.com\"}",
+      "body": "{\"ArticleID\":\"testArticleID\", \"ArticleTitle\":\"Test Title 1\",\"PreviousPage\": \"/\",\"CurrentPage\": \"/posts/test-title\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId2\",\"Refreshed\":true, \"Referrer\":\"https://example.com\"}",
       "md5OfBody": "fce0ea8dd236ccb3ed9b37dae260836f",
       "md5OfMessageAttributes": "582c92c5c5b6ac403040a4f3ab3115c9",
       "eventSourceARN": "arn:aws:sqs:us-west-2:123456789012:SQSQueue",
@@ -75,7 +75,7 @@
     {
       "messageId": "MessageID_3",
       "receiptHandle": "MessageReceiptHandle",
-      "body": "{\"ArticleID\":\"testArticleID\", \"ArticleTitle\":\"Test Title\",\"PreviousPage\": \"/\",\"CurrentPage\": \"/posts/test-title\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId3\", \"Referrer\":\"https://example.com\"}",
+      "body": "{\"ArticleID\":\"testArticleID\", \"ArticleTitle\":\"Test Title 1\",\"PreviousPage\": \"/\",\"CurrentPage\": \"/posts/test-title\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId3\", \"Refreshed\":true, \"Referrer\":\"https://example.com\"}",
       "md5OfBody": "fce0ea8dd236ccb3ed9b37dae260836f",
       "md5OfMessageAttributes": "582c92c5c5b6ac403040a4f3ab3115c9",
       "eventSourceARN": "arn:aws:sqs:us-west-2:123456789012:SQSQueue",
@@ -111,7 +111,7 @@
     {
       "messageId": "MessageID_4",
       "receiptHandle": "MessageReceiptHandle",
-      "body": "{\"ArticleID\":\"testArticleID\", \"ArticleTitle\":\"Test Title\",\"PreviousPage\": \"null\",\"CurrentPage\": \"/posts/test-title\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId4\", \"Referrer\":\"https://google.com\"}",
+      "body": "{\"ArticleID\":\"testArticleID\", \"ArticleTitle\":\"Test Title 1\",\"PreviousPage\": \"null\",\"CurrentPage\": \"/posts/test-title\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId4\", \"Refreshed\":true, \"Referrer\":\"https://google.com/and-whatever\"}",
       "md5OfBody": "fce0ea8dd236ccb3ed9b37dae260836f",
       "md5OfMessageAttributes": "582c92c5c5b6ac403040a4f3ab3115c9",
       "eventSourceARN": "arn:aws:sqs:us-west-2:123456789012:SQSQueue",
@@ -147,7 +147,7 @@
     {
       "messageId": "MessageID_5",
       "receiptHandle": "MessageReceiptHandle",
-      "body": "{\"ArticleID\":\"testArticleID2\", \"ArticleTitle\":\"Test Title\",\"PreviousPage\": \"/\",\"CurrentPage\": \"/posts/test-title\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId4\",\"Referrer\":\"https://example.com\"}",
+      "body": "{\"ArticleID\":\"testArticleID2\", \"ArticleTitle\":\"Test Title 2\",\"PreviousPage\": \"/\",\"CurrentPage\": \"/posts/test-title\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId5\",\"Referrer\":\"https://example.com\"}",
       "md5OfBody": "fce0ea8dd236ccb3ed9b37dae260836f",
       "md5OfMessageAttributes": "582c92c5c5b6ac403040a4f3ab3115c9",
       "eventSourceARN": "arn:aws:sqs:us-west-2:123456789012:SQSQueue",
@@ -183,7 +183,7 @@
     {
       "messageId": "MessageID_6",
       "receiptHandle": "MessageReceiptHandle",
-      "body": "{\"ArticleID\":\"testArticleID3\", \"ArticleTitle\":\"Test Title\",\"PreviousPage\": \"/\",\"CurrentPage\": \"/posts/test-title\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId5\",\"Referrer\":\"https://example.com\"}",
+      "body": "{\"ArticleID\":\"testArticleID3\", \"ArticleTitle\":\"Test Title 3\",\"PreviousPage\": \"/\",\"CurrentPage\": \"/posts/test-title-3\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId6\",\"Refreshed\":false, \"Referrer\":\"https://example.com\"}",
       "md5OfBody": "fce0ea8dd236ccb3ed9b37dae260836f",
       "md5OfMessageAttributes": "582c92c5c5b6ac403040a4f3ab3115c9",
       "eventSourceARN": "arn:aws:sqs:us-west-2:123456789012:SQSQueue",
@@ -219,7 +219,7 @@
     {
       "messageId": "MessageID_7",
       "receiptHandle": "MessageReceiptHandle",
-      "body": "{\"ArticleID\":\"testArticleID3\", \"ArticleTitle\":\"Test Title\",\"PreviousPage\": \"/\",\"CurrentPage\": \"/posts/test-title\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId6\",\"Referrer\":\"https://example.com\"}",
+      "body": "{\"ArticleID\":\"testArticleID3\", \"ArticleTitle\":\"Test Title 3\",\"PreviousPage\": \"/\",\"CurrentPage\": \"/posts/test-title-3\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId7\",\"Refreshed\":false, \"Referrer\":\"https://example.com\"}",
       "md5OfBody": "fce0ea8dd236ccb3ed9b37dae260836f",
       "md5OfMessageAttributes": "582c92c5c5b6ac403040a4f3ab3115c9",
       "eventSourceARN": "arn:aws:sqs:us-west-2:123456789012:SQSQueue",
@@ -255,7 +255,7 @@
     {
       "messageId": "MessageID_8",
       "receiptHandle": "MessageReceiptHandle",
-      "body": "{\"ArticleID\":\"testArticleID3\", \"ArticleTitle\":\"Test Title\",\"PreviousPage\": \"/\",\"CurrentPage\": \"/posts/test-title\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId7\", \"Referrer\":\"https://example.com\"}",
+      "body": "{\"ArticleID\":\"testArticleID3\", \"ArticleTitle\":\"Test Title 3\",\"PreviousPage\": \"/\",\"CurrentPage\": \"/posts/test-title-3\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId8\", \"Refreshed\":true,\"Referrer\":\"https://example.com\"}",
       "md5OfBody": "fce0ea8dd236ccb3ed9b37dae260836f",
       "md5OfMessageAttributes": "582c92c5c5b6ac403040a4f3ab3115c9",
       "eventSourceARN": "arn:aws:sqs:us-west-2:123456789012:SQSQueue",
@@ -291,7 +291,7 @@
     {
       "messageId": "MessageID_9",
       "receiptHandle": "MessageReceiptHandle",
-      "body": "{\"ArticleID\":\"testArticleID4\", \"ArticleTitle\":\"Test Title\",\"PreviousPage\": \"/\",\"CurrentPage\": \"/posts/test-title\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId8\", \"Referrer\":\"https://example.com\"}",
+      "body": "{\"ArticleID\":\"testArticleID4\", \"ArticleTitle\":\"Test Title 4\",\"PreviousPage\": \"/\",\"CurrentPage\": \"/posts/test-title-4\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId9\", \"Refreshed\":false, \"Referrer\":\"https://example.com\"}",
       "md5OfBody": "fce0ea8dd236ccb3ed9b37dae260836f",
       "md5OfMessageAttributes": "582c92c5c5b6ac403040a4f3ab3115c9",
       "eventSourceARN": "arn:aws:sqs:us-west-2:123456789012:SQSQueue",
@@ -327,7 +327,7 @@
     {
       "messageId": "MessageID_10",
       "receiptHandle": "MessageReceiptHandle",
-      "body": "{\"ArticleID\":\"testArticleID5\", \"ArticleTitle\":\"Test Title\",\"PreviousPage\": \"null\",\"CurrentPage\": \"/posts/test-title\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId9\", \"Referrer\":\"https://example.com\"}",
+      "body": "{\"ArticleID\":\"testArticleID5\", \"ArticleTitle\":\"Test Title 5\",\"PreviousPage\": \"null\",\"CurrentPage\": \"/posts/test-title-5\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId10\", \"Refreshed\":true, \"Referrer\":\"https://example.com/67&ere\"}",
       "md5OfBody": "fce0ea8dd236ccb3ed9b37dae260836f",
       "md5OfMessageAttributes": "582c92c5c5b6ac403040a4f3ab3115c9",
       "eventSourceARN": "arn:aws:sqs:us-west-2:123456789012:SQSQueue",
@@ -363,7 +363,7 @@
     {
       "messageId": "MessageID_11",
       "receiptHandle": "MessageReceiptHandle",
-      "body": "{\"ArticleID\":\"testArticleID5\", \"ArticleTitle\":\"Test Title\",\"PreviousPage\": \"/posts/learning-go\",\"CurrentPage\": \"/posts/test-title\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId10\",\"Referrer\":\"https://example.com\"}",
+      "body": "{\"ArticleID\":\"testArticleID5\", \"ArticleTitle\":\"Test Title 5\",\"PreviousPage\": \"/posts/learning-go\",\"CurrentPage\": \"/posts/test-title-5\",\"EventType\":\"post_view\",\"ConnectionID\":\"testConnectionId11\",\"Refreshed\":false,\"Referrer\":\"https://example.com\"}",
       "md5OfBody": "fce0ea8dd236ccb3ed9b37dae260836f",
       "md5OfMessageAttributes": "582c92c5c5b6ac403040a4f3ab3115c9",
       "eventSourceARN": "arn:aws:sqs:us-west-2:123456789012:SQSQueue",

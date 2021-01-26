@@ -23,12 +23,12 @@ import (
 )
 
 type response struct {
-	ArticleViews int `json:"uniqueViews"`
+	ArticleViews int `json:"totalViews"`
 }
 
 func getSession() (*session.Session, error) {
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(os.Getenv("TOPIC_REGION")),
+		Region: aws.String(os.Getenv("REGION")),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("Unable to create session: %v", err)
@@ -115,6 +115,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayWebsocketProxyR
 		CurrentPage:  data.CurrentPage,
 		PreviousPage: data.PreviousPage,
 		ConnectionID: request.RequestContext.ConnectionID,
+		Refreshed:    data.Refreshed,
 		Referrer:     data.Referrer,
 	}
 	if err := store.UpdateReferrerTable(referrer); err != nil {
