@@ -152,8 +152,8 @@ func Sort(data Event) (string, string, error) {
 	switch data.(type) {
 	case Page:
 		currentURL := data.(Page).CurrentPage
-		contact := currentURL == "/pages/contacts"
-		about := currentURL == "/pages/about"
+		contact, _ := regexp.MatchString("/pages/contacts", currentURL)
+		about, _ := regexp.MatchString("/pages/about", currentURL)
 		home := currentURL == "/"
 
 		if about {
