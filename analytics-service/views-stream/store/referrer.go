@@ -11,22 +11,28 @@ import (
 	"github.com/google/uuid"
 )
 
-// UpdateReferrerTable updates the table with the given value from SQS event
+// IsDomain checks whether referrer value is same as domain origin
+func IsDomain(ref string) bool {
+	isCurrentDomain, _ := regexp.MatchString(os.Getenv("DOMAIN_NAME"), ref)
+	return isCurrentDomain
+}
+
+// UpdateReferrerTable only updates the table if referrer is external
+// and not null
 func UpdateReferrerTable(data process.AnalyticsData) error {
 	client, err := GetClient()
 	if err != nil {
 		return fmt.Errorf("Error: %v", err)
 	}
 
-	referrer := data.Referrer
-	isCurrentDomain, _ := regexp.MatchString(os.Getenv("DOMAIN_NAME"), referrer)
+	isCurrentDomain := IsDomain(data.Referrer)
 
-	// Check referrer is external
-	if !isCurrentDomain {
+	// Only store referrer if it is external
+	if !isCurrentDomain && data.Referrer != "" {
 		input := &dynamodb.UpdateItemInput{
 			ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 				":referrer": {
-					S: aws.String(referrer),
+					S: aws.String(data.Referrer),
 				},
 				":currentPage": {
 					S: aws.String(data.CurrentPage),
@@ -35,7 +41,7 @@ func UpdateReferrerTable(data process.AnalyticsData) error {
 					S: aws.String(data.ConnectionID),
 				},
 			},
-			TableName: aws.String(os.Getenv("TABLE_NAME")),
+			TableName: aws.String(os.Getenv("REFERRER_TABLE_NAME")),
 			Key: map[string]*dynamodb.AttributeValue{
 				"id": {
 					S: aws.String(uuid.New().String()),
