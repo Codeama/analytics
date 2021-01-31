@@ -15,21 +15,12 @@ type IncomingEvent struct {
 	ConnectionID string
 	CurrentPage  string
 	PreviousPage string
+	Refreshed    bool
 	EventType    string
 	Referrer     string
 }
 
-// Checks if event is a unique view
-func isUnique(previousPage string, referrer string) bool {
-	// UNIQUE: if previousPage is not null OR if previousPage is null and referrer is not current domain
-	if previousPage != "null" || previousPage == "null" && referrer != os.Getenv("DOMAIN_NAME") {
-		return true
-	}
-
-	return false
-}
-
-// getClient creates a dynamodb client to connect to acsess the datastore
+// getClient creates a dynamodb client to connect DynamoDB to acsess the datastore
 func getClient() (*dynamodb.DynamoDB, error) {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("TABLE_REGION")),
@@ -50,8 +41,7 @@ func UpdateTable(data IncomingEvent) error {
 
 	if data.EventType == "homepage_view" && data.ConnectionID != "" {
 		var uniqueCount int
-		unique := isUnique(data.PreviousPage, data.Referrer)
-		if unique {
+		if !data.Refreshed {
 			uniqueCount = 1
 		}
 
