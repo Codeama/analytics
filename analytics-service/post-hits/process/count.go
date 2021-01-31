@@ -28,9 +28,8 @@ type ProcessedEvent struct {
 }
 
 // CountViews totals the number of views for each article
-// It processes each article event by implementing a set using Go map
-// and totals them, each one being a view (1)
-// Employs a map reduce paradigm for parallel data processing
+// It processes the sum of each article viewed by implementing a set using Go map
+// In essence, employs a map reduce paradigm for parallel data processing
 func CountViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
 	var data incomingEvent
 	var totalViews = make(map[string]int)
@@ -44,10 +43,8 @@ func CountViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
 		// checks current article has a view value
 		_, hasViews := totalViews[data.ArticleID]
 		// checks article is already in map (it should be; see else statement below that runs at least once for all incoming data)
-		// then updates it (deletes and replaces with article item
-		// with the latest view count)
-		v, exists := mappedArt[data.ArticleID]
-		fmt.Printf("Existing article: %v", v)
+		// then updates it (by deleting existing one and replacing it with latest stats)
+		_, exists := mappedArt[data.ArticleID]
 		if hasViews && exists {
 			delete(mappedArt, data.ArticleID)
 

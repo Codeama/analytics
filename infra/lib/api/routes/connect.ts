@@ -7,7 +7,7 @@ import {
   CfnRouteResponse,
   CfnIntegrationResponse,
 } from '@aws-cdk/aws-apigatewayv2';
-import { config } from '../../config';
+import { config } from '../../../config';
 import { Role } from '@aws-cdk/aws-iam';
 
 interface ConnectionProps {
