@@ -7,7 +7,7 @@ on:
       - master # triggered on merge to master
 
 jobs:
-  build:
+  Build_and_Deploy_CDK_App:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout"
