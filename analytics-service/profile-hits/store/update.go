@@ -15,18 +15,9 @@ type IncomingEvent struct {
 	ConnectionID string
 	CurrentPage  string
 	PreviousPage string
+	Refreshed    bool
 	EventType    string
 	Referrer     string
-}
-
-// Checks if event is a unique view
-func isUnique(previousPage string, referrer string) bool {
-	// UNIQUE: if previousPage is not null OR if previousPage is null and referrer is not current domain
-	if previousPage != "null" || previousPage == "null" && referrer != os.Getenv("DOMAIN_NAME") {
-		return true
-	}
-
-	return false
 }
 
 // getClient creates a dynamodb client to connect to acsess the datastore
@@ -51,8 +42,7 @@ func UpdateTable(data IncomingEvent) error {
 	// Update contact views
 	if data.EventType == "contact_view" && data.ConnectionID != "" {
 		var uniqueCount int
-		unique := isUnique(data.PreviousPage, data.Referrer)
-		if unique {
+		if !data.Refreshed {
 			uniqueCount = 1
 		}
 
@@ -86,8 +76,7 @@ func UpdateTable(data IncomingEvent) error {
 	// Update about views
 	if data.EventType == "about_view" && data.ConnectionID != "" {
 		var uniqueCount int
-		unique := isUnique(data.PreviousPage, data.Referrer)
-		if unique {
+		if !data.Refreshed {
 			uniqueCount = 1
 		}
 		input := &dynamodb.UpdateItemInput{
