@@ -11,7 +11,7 @@ import { Default } from './routes/default';
 import { Views } from './routes/views';
 import { lambdaPolicy } from './policies';
 import { HitsHandler } from './subscriber';
-import { config } from '../config';
+import { config } from '../../config';
 import { LogGroup, RetentionDays } from '@aws-cdk/aws-logs';
 import { CfnAccount } from '@aws-cdk/aws-apigateway';
 import { Connection } from './routes/connect';
@@ -84,11 +84,12 @@ export class ApiStack extends Stack {
       api: this.api,
       role: this.role,
       topic: this.snsTopic,
-      topicRegion: config.AWS_REGION as string,
+      region: config.AWS_REGION as string,
       postTableName: config.POST_TABLE_READER,
       referrerTableName: config.REFERRER_TABLE,
       connectionUrl: url,
       tablePermission: true,
+      domainName: config.DOMAIN_NAME,
     });
 
     this.defaultRouteKey = new Default(this, 'Default', {
@@ -118,7 +119,7 @@ export class ApiStack extends Stack {
     new CfnStage(this, this.namespace + 'stage', {
       apiId: this.api.ref,
       // autoDeploy: true, //changes to Stage constructs will not deploy unless autoDeploy is false
-      // deploymentId: deployment.ref,
+      deploymentId: deployment.ref,
       stageName: this.namespace,
       accessLogSettings: {
         destinationArn: this.apiLogGroup.logGroupArn,
