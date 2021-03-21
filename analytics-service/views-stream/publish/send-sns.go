@@ -69,7 +69,7 @@ func (tag *Tag) SendEvent(snsClient snsiface.SNSAPI, data string) error {
 			return errorMessage
 		}
 	default:
-		return fmt.Errorf("Cannot publish data %v", data)
+		return fmt.Errorf("cannot publish data with tag: %q", tag.Name)
 	}
 	return nil
 }

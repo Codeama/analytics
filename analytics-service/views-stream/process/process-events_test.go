@@ -2,188 +2,170 @@ package process
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
-var mockJSONArticle = `{
-	"articleId":"123testId",
-	"articleTitle": "Unit Testing Go Functions",
-	"previousPage": "/",
-	"currentPage": "/posts/unit-testing-go-functions"
-	}`
-
-var mockArticleData = AnalyticsData{
-	ArticleID:    "123testId",
-	ArticleTitle: "Unit Testing Go Functions",
-	PreviousPage: "/",
-	CurrentPage:  "/posts/unit-testing-go-functions",
-	Refreshed:    false,
-}
-
-var mockHomePageData = AnalyticsData{
-	PreviousPage: "null",
-	CurrentPage:  "/",
-	Refreshed:    false,
-}
-
-var mockHomePage = Page{
-	PreviousPage: "null",
-	CurrentPage:  "/",
-	Refreshed:    false,
-}
-
-var mockAboutMePage = Page{
-	PreviousPage: "/",
-	CurrentPage:  "/pages/about",
-	Refreshed:    false,
-}
-
-var mockContactMePage = Page{
-	PreviousPage: "/",
-	CurrentPage:  "/pages/contacts",
-	Refreshed:    false,
-}
-
-var mockPageDataError = Page{
-	PreviousPage: "/",
-	CurrentPage:  "/me/about",
-	Refreshed:    false,
-}
-
-var mockArticlePage = Article{
-	ArticleID:    "123testId",
-	ArticleTitle: "Unit Testing Go Functions",
-	Page: Page{
-		PreviousPage: "/",
-		CurrentPage:  "/posts/unit-testing-go-functions",
-		Refreshed:    false,
-	},
-}
-
-var mockArticlePageError = Article{
-	ArticleID:    "123testId",
-	ArticleTitle: "Random Title",
-	Page: Page{
-		PreviousPage: "/",
-		CurrentPage:  "/about-me",
-	},
-}
-
-var incomingData = IncomingData{
-	PreviousPage: "/mypage",
-	CurrentPage:  "/posts/hello-world",
-	Refreshed:    false,
-}
-
-var incomingNoPageData = IncomingData{
-	PreviousPage: "",
-	CurrentPage:  "/posts/hello-world",
-	Refreshed:    false,
-}
-
 func TestValidateData(t *testing.T) {
-	id := "testId"
+	t.Parallel()
 
-	expected := AnalyticsData{
-		"",
-		"",
-		incomingData.PreviousPage,
-		incomingData.CurrentPage,
-		id,
-		false,
-		incomingData.Referrer,
+	testCases := []struct {
+		input1      IncomingData
+		input2      string
+		want        AnalyticsData
+		errReturned bool
+	}{
+		{
+			input1:      IncomingData{ArticleID: "TestID", ArticleTitle: "TestArticle", PreviousPage: "/mypage", CurrentPage: "/posts/hello-world", Refreshed: false},
+			input2:      "testId",
+			want:        AnalyticsData{ArticleID: "TestID", ArticleTitle: "TestArticle", PreviousPage: "/mypage", CurrentPage: "/posts/hello-world", ConnectionID: "testId", Refreshed: false},
+			errReturned: false,
+		},
+		{
+			input1:      IncomingData{ArticleID: "TestID", ArticleTitle: "TestArticle", PreviousPage: "/", CurrentPage: "/posts/hello-world", Refreshed: false},
+			input2:      "",
+			want:        AnalyticsData{ArticleID: "TestID", ArticleTitle: "TestArticle", PreviousPage: "/", CurrentPage: "/page/unnecessary", ConnectionID: "testID", Refreshed: false},
+			errReturned: true,
+		},
+		{
+			input1:      IncomingData{ArticleID: "", ArticleTitle: "", PreviousPage: "/", CurrentPage: "/posts/hello-world", Refreshed: false},
+			input2:      "",
+			want:        AnalyticsData{ArticleID: "TestID", ArticleTitle: "TestArticle", PreviousPage: "/", CurrentPage: "/page/unnecessary", ConnectionID: "testID", Refreshed: false},
+			errReturned: true,
+		},
 	}
 
-	actual, err := ValidateData(incomingData, id)
-	if actual != expected {
-		t.Errorf("\n%+v is not of AnalyticsData type", actual)
+	for _, tc := range testCases {
+		got, err := ValidateData(tc.input1, tc.input2)
+		errExpected := (err != nil)
+
+		if tc.errReturned != errExpected {
+			t.Fatalf("ValidateData(%v, %s): unexpected error status %v", tc.input1, tc.input2, errExpected)
+		}
+		if !errExpected && got != tc.want {
+			t.Errorf("ValidateData(%v, %s) expected: %v, got: %v", tc.input1, tc.input2, tc.want, got)
+		}
+	}
+}
+
+func TestFilter(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		name  string
+		input AnalyticsData
+		want  Event
+	}{
+		{
+			name:  "Article",
+			input: AnalyticsData{ArticleID: "123testId", ArticleTitle: "Unit Testing Go Functions", PreviousPage: "/", CurrentPage: "/posts/unit-testing-go-functions", Refreshed: false},
+			want:  Article{"123testId", "Unit Testing Go Functions", Page{PreviousPage: "/", CurrentPage: "/posts/unit-testing-go-functions", Refreshed: false}},
+		},
+		{
+			name:  "Page",
+			input: AnalyticsData{ArticleID: "", ArticleTitle: "", PreviousPage: "/", CurrentPage: "/posts/unit-testing-go-functions", Refreshed: false},
+			want:  Page{PreviousPage: "/", CurrentPage: "/posts/unit-testing-go-functions", Refreshed: false},
+		},
 	}
 
-	if err != nil {
-		t.Errorf("ValidateData(%v, %v) returned an error: %v", incomingData, id, err)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := FilterData(tc.input)
+
+			if got != tc.want {
+				t.Errorf("FilterData(%v) expected: %v, got: %v", tc.input, tc.want, got)
+			}
+		})
+	}
+}
+
+func TestSort(t *testing.T) {
+	testCases := []struct {
+		name        string
+		input       Event
+		output1     string
+		output2     string
+		errReturned bool
+	}{
+		{
+			name:        "Homepage",
+			input:       Page{PreviousPage: "null", CurrentPage: "/", Refreshed: false},
+			output1:     "homepage_view",
+			output2:     string(`{"ConnectionID":"","CurrentPage":"/","PreviousPage":"null","Refreshed":false,"Referrer":"","EventType":"homepage_view"}`),
+			errReturned: false,
+		},
+		{
+			name:        "AboutPage",
+			input:       Page{PreviousPage: "/", CurrentPage: "/pages/about", Refreshed: false},
+			output1:     "about_view",
+			output2:     string(`{"ConnectionID":"","CurrentPage":"/pages/about","PreviousPage":"/","Refreshed":false,"Referrer":"","EventType":"about_view"}`),
+			errReturned: false,
+		},
+		{
+			name:        "ContactsPage",
+			input:       Page{PreviousPage: "/", CurrentPage: "/pages/contacts", Refreshed: false},
+			output1:     "contact_view",
+			output2:     string(`{"ConnectionID":"","CurrentPage":"/pages/contacts","PreviousPage":"/","Refreshed":false,"Referrer":"","EventType":"contact_view"}`),
+			errReturned: false,
+		},
+		{
+			name:        "ArticlePage",
+			input:       Article{"123testId", "Unit Testing Go Functions", Page{PreviousPage: "/", CurrentPage: "/posts/unit-testing-go-functions", Refreshed: false}},
+			output1:     "post_view",
+			output2:     string(`{"ArticleID":"123testId","ArticleTitle":"Unit Testing Go Functions","ConnectionID":"","CurrentPage":"/posts/unit-testing-go-functions","PreviousPage":"/","Refreshed":false,"Referrer":"","EventType":"post_view"}`),
+			errReturned: false,
+		},
+		{
+			name:        "Error",
+			input:       Page{PreviousPage: "/", CurrentPage: "/me/about", Refreshed: false},
+			output1:     "bogusText",
+			output2:     "BOGUS",
+			errReturned: true,
+		},
 	}
 
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got1, got2, err := Sort(tc.input)
+
+			errExpected := (err != nil)
+
+			if tc.errReturned != errExpected {
+				t.Fatalf("Sort(%v) unexpected error status: want %v got %v", tc.input, tc.errReturned, err)
+			}
+			if !errExpected && got1 != tc.output1 {
+				t.Errorf("Sort(%v) expected %v, got %v", tc.input, tc.output1, got1)
+			}
+			if !errExpected && got2 != tc.output2 {
+				t.Errorf("Sort(%v) expected %v, got %v", tc.input, tc.output2, got2)
+			}
+		})
+	}
 }
 
-func TestInValidData(t *testing.T) {
-	actualResult, err := ValidateData(incomingData, "")
-	assert.Equal(t, AnalyticsData{}, actualResult, "It should return empty AnalyticsData value")
-	assert.NotNil(t, err, "It should return an error")
+func TestUnknownEventType(t *testing.T) {
+	tc := struct {
+		input       mockEventType
+		want        string
+		errReturned bool
+	}{
+		input:       mockEventType{"hello-world-page"},
+		want:        "Doesn't matter when it returns an error",
+		errReturned: true,
+	}
+
+	_, _, err := Sort(tc.input)
+
+	errExpected := (err != nil)
+
+	if errExpected != tc.errReturned {
+		t.Fatalf("Sort(%v) unexpected error status: expected %v got %v", tc.input, tc.errReturned, err)
+	}
 }
 
-func TestInValidNoPageData(t *testing.T) {
-	data, err := ValidateData(incomingNoPageData, "testId")
-	assert.Equal(t, AnalyticsData{}, data, "It should return empty AnalyticsData value")
-	assert.NotNil(t, err, "It should return an error")
-}
-
-func TestFilterDataArticle(t *testing.T) {
-	result := FilterData(mockArticleData)
-	assert.Equal(t, result.(Event), result, "Article should be of type Event")
-
-}
-
-func TestFilterDataPage(t *testing.T) {
-	result := FilterData(mockHomePageData)
-	assert.Equal(t, result.(Event), result, "Page should be of type Event")
-
-}
-
-func TestSortHome(t *testing.T) {
-	var mockJSONHomePage = `{"ConnectionID":"","CurrentPage":"/","PreviousPage":"null","Refreshed":false,"Referrer":"","EventType":"homepage_view"}`
-	tag, data, _ := Sort(mockHomePage)
-	assert.Equal(t, "homepage_view", tag, "Event tag should be 'homepage_view'")
-	assert.Equal(t, string(mockJSONHomePage), data, "It should return a JSON string")
-}
-
-func TestSortAbout(t *testing.T) {
-	var mockJSONAboutMePage = `{"ConnectionID":"","CurrentPage":"/pages/about","PreviousPage":"/","Refreshed":false,"Referrer":"","EventType":"about_view"}`
-	tag, data, _ := Sort(mockAboutMePage)
-	assert.Equal(t, "about_view", tag, "Event tag should be 'about_view'")
-	assert.Equal(t, string(mockJSONAboutMePage), data, "It should return a JSON string")
-}
-
-func TestSortContact(t *testing.T) {
-	var mockJSONContactMePage = `{"ConnectionID":"","CurrentPage":"/pages/contacts","PreviousPage":"/","Refreshed":false,"Referrer":"","EventType":"contact_view"}`
-	tag, data, _ := Sort(mockContactMePage)
-	assert.Equal(t, "contact_view", tag, "Event tag should be 'contact_view'")
-	assert.Equal(t, string(mockJSONContactMePage), data, "It should return a JSON string")
-}
-
-func TestSortArticle(t *testing.T) {
-	var mockJSONArticlePage = `{"ArticleID":"123testId","ArticleTitle":"Unit Testing Go Functions","ConnectionID":"","CurrentPage":"/posts/unit-testing-go-functions","PreviousPage":"/","Refreshed":false,"Referrer":"","EventType":"post_view"}`
-	tag, data, _ := Sort(mockArticlePage)
-	assert.Equal(t, "post_view", tag, "Event tag should be 'post_view'")
-	assert.Equal(t, string(mockJSONArticlePage), data, "It should return a JSON string")
-}
-
-func TestSortPageError(t *testing.T) {
-	tag, data, err := Sort(mockPageDataError)
-	assert.Equal(t, "", tag, "There should be no tag")
-	assert.Equal(t, "", data, "There should be no data")
-	assert.NotNil(t, err, "There should be an error")
-}
-
-func TestSortArticleError(t *testing.T) {
-	tag, data, err := Sort(mockArticlePageError)
-	assert.Equal(t, "", tag, "There should be no tag")
-	assert.Equal(t, "", data, "There should be no data")
-	assert.NotNil(t, err, "There should be an error")
-}
-
+// Implements Event interface to test for unknown event
 type mockEventType struct {
 	testPage string
 }
 
 func (mockedData mockEventType) tagEvent(tag string) (string, string) {
 	return "test_tag", "testData"
-}
-
-func TestUnknownEventType(t *testing.T) {
-	mockData := mockEventType{"hello-world-page"}
-	tag, data, err := Sort(mockData)
-	assert.Equal(t, "", tag, "It  should return an empty string tag")
-	assert.Equal(t, "", data, "It should return an empty string data")
-	assert.NotNil(t, err, "It should retrun an error value")
 }

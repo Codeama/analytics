@@ -1,20 +1,16 @@
 package publish
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/sns"
 	"github.com/aws/aws-sdk-go/service/sns/snsiface"
-	"github.com/stretchr/testify/assert"
 )
 
+// Tests in this file follow the testing advice given on AWS docs/repos
+// which helps to mock their services so I can test my own code
 type mockSNSClient struct {
-	snsiface.SNSAPI
-}
-
-type mockSNSClientError struct {
 	snsiface.SNSAPI
 }
 
@@ -24,69 +20,61 @@ func (mockClient *mockSNSClient) Publish(input *sns.PublishInput) (*sns.PublishO
 	}, nil
 }
 
-func (mockClient *mockSNSClientError) Publish(input *sns.PublishInput) (*sns.PublishOutput, error) {
-	return &sns.PublishOutput{}, fmt.Errorf("Unable to publish message")
-}
+func TestSendEventTags(t *testing.T) {
+	t.Parallel()
 
-func TestSendEventHomePageView(t *testing.T) {
-	tag := Tag{Name: "homepage_view"}
-	mockSNS := &mockSNSClient{}
-	err := tag.SendEvent(mockSNS, "testData")
-	assert.Nil(t, err, "Publish successful")
-}
+	testCases := []struct {
+		name        string
+		tag         Tag
+		event       string
+		errReturned bool
+	}{
+		{
+			name:        "HomePageView",
+			tag:         Tag{"homepage_view"},
+			event:       "testData",
+			errReturned: false,
+		},
+		{
+			name:        "PostView",
+			tag:         Tag{"post_view"},
+			event:       "from-client-data",
+			errReturned: false,
+		},
+		{
+			name:        "UnknownTag",
+			tag:         Tag{"just_mine"},
+			event:       "asdf;lkj",
+			errReturned: true,
+		},
+		{
+			name:        "ContactView",
+			tag:         Tag{"contact_view"},
+			event:       "any data",
+			errReturned: false,
+		},
+		{
+			name:        "AboutView",
+			tag:         Tag{"about_view"},
+			event:       "asdf;lkj",
+			errReturned: false,
+		},
+		{
+			name:        "Random",
+			tag:         Tag{"randoms"},
+			event:       "any data",
+			errReturned: true,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.tag.SendEvent(&mockSNSClient{}, tc.event)
 
-func TestSendEventHomePageViewFail(t *testing.T) {
-	tag := Tag{Name: "homepage_view"}
-	mockSNS := &mockSNSClientError{}
-	err := tag.SendEvent(mockSNS, "testData")
-	assert.NotNil(t, err, "Publish failed")
-}
+			errExpected := (err != nil)
 
-func TestSendEventPostView(t *testing.T) {
-	tag := Tag{Name: "post_view"}
-	mockSNS := &mockSNSClient{}
-	err := tag.SendEvent(mockSNS, "testData")
-	assert.Nil(t, err, "Publish successful")
-}
-
-func TestSendEventPostViewFail(t *testing.T) {
-	tag := Tag{Name: "post_view"}
-	mockSNS := &mockSNSClientError{}
-	err := tag.SendEvent(mockSNS, "testData")
-	assert.NotNil(t, err, "Publish successful")
-}
-
-func TestSendEventContactView(t *testing.T) {
-	tag := Tag{Name: "contact_view"}
-	mockSNS := &mockSNSClient{}
-	err := tag.SendEvent(mockSNS, "testData")
-	assert.Nil(t, err, "Publish successful")
-}
-
-func TestSendEventContactViewFail(t *testing.T) {
-	tag := Tag{Name: "contact_view"}
-	mockSNS := &mockSNSClientError{}
-	err := tag.SendEvent(mockSNS, "testData")
-	assert.NotNil(t, err, "Publish successful")
-}
-
-func TestSendEventAboutView(t *testing.T) {
-	tag := Tag{Name: "about_view"}
-	mockSNS := &mockSNSClient{}
-	err := tag.SendEvent(mockSNS, "testData")
-	assert.Nil(t, err, "Publish successful")
-}
-
-func TestSendEventAboutViewFail(t *testing.T) {
-	tag := Tag{Name: "about_view"}
-	mockSNS := &mockSNSClientError{}
-	err := tag.SendEvent(mockSNS, "testData")
-	assert.NotNil(t, err, "Publish successful")
-}
-
-func TestSendEventFail(t *testing.T) {
-	tag := Tag{Name: "random_view"}
-	mockSNS := &mockSNSClientError{}
-	err := tag.SendEvent(mockSNS, "testData")
-	assert.NotNil(t, err, "Returns an error")
+			if tc.errReturned != errExpected {
+				t.Fatalf("Unexpected error status: expected no error, got %q", err)
+			}
+		})
+	}
 }
