@@ -49,11 +49,11 @@ type AnalyticsData struct {
 	Referrer     string
 }
 
-// ValidateData validates and stores incoming data in an struct
+// ValidateData validates and stores incoming data and a connection ID
 func ValidateData(data IncomingData, id string) (AnalyticsData, error) {
 	// check connectionId isn't empty
 	if id == "" {
-		return AnalyticsData{}, fmt.Errorf("No ConnectionId from request")
+		return AnalyticsData{}, fmt.Errorf("no ConnectionId from request")
 	}
 
 	// check there are at least members of Page struct
@@ -74,9 +74,8 @@ func ValidateData(data IncomingData, id string) (AnalyticsData, error) {
 
 }
 
-// FilterData filters incoming json data into the right struct
-// and returns the corresponding struct as an interface of Event
-// for further processing by Sort func
+// FilterData takes AnalyticsData struct, filters and maps the members into
+// an Article or Page struct and returns an Event interface
 func FilterData(data AnalyticsData) Event {
 	if data.ArticleID == "" || data.ArticleTitle == "" {
 		var page Page

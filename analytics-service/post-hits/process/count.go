@@ -29,7 +29,7 @@ type ProcessedEvent struct {
 
 // CountViews totals the number of views for each article
 // It processes the sum of each article viewed by implementing a set using Go map
-// In essence, employs a map reduce paradigm for parallel data processing
+// and does parallel data processing
 func CountViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
 	var data incomingEvent
 	var totalViews = make(map[string]int)
@@ -38,7 +38,7 @@ func CountViews(sqsEvent events.SQSEvent) (map[string]ProcessedEvent, error) {
 	for _, message := range sqsEvent.Records {
 		// serialise to Go struct
 		if err := json.Unmarshal([]byte(message.Body), &data); err != nil {
-			return nil, fmt.Errorf("Could not deserialise data: %v", err)
+			return nil, fmt.Errorf("could not deserialise data: %v", err)
 		}
 		// checks current article has a view value
 		_, hasViews := totalViews[data.ArticleID]

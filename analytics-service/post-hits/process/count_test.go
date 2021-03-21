@@ -6,12 +6,12 @@ import (
 	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/stretchr/testify/assert"
+	"github.com/google/go-cmp/cmp"
 )
 
 // Data used to mock test result for TestCountView
 // Also used as data input for TestGetPost
-var mockViewCountResult = map[string]ProcessedEvent{
+var countResult = map[string]ProcessedEvent{
 	"testArticleID": ProcessedEvent{
 		ArticleID:    "testArticleID",
 		ArticleTitle: "Test Title 1",
@@ -45,7 +45,7 @@ var mockViewCountResult = map[string]ProcessedEvent{
 }
 
 // Data used as TestGetPosts expected result
-var mockPostResult = []ProcessedEvent{
+var getPostResult = []ProcessedEvent{
 	{
 		ArticleID:    "testArticleID",
 		ArticleTitle: "Test Title 1",
@@ -88,25 +88,38 @@ func TestCountViews(t *testing.T) {
 	if err := json.Unmarshal(inputJSON, &inputEvent); err != nil {
 		t.Errorf("could not unmarshal data. details: %v", err)
 	}
-	actual, _ := CountViews(inputEvent)
-	assert.Equal(t, mockViewCountResult, actual)
+	got, err := CountViews(inputEvent)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %q", err)
+	}
+
+	if !cmp.Equal(got, countResult) {
+		t.Errorf("CountViews(%v) want %v got %v", inputEvent, countResult, got)
+	}
 }
 
 func TestGetPosts(t *testing.T) {
 	var expectedProcessed ProcessedEvent
 	var actualProcessed ProcessedEvent
-	posts := GetCountedPosts(mockViewCountResult)
-	assert.Equal(t, len(mockPostResult), len(posts), "It should return an array of same length as the map input data")
+	posts := GetCountedPosts(countResult)
+
+	if len(getPostResult) != len(posts) {
+		t.Errorf("GetCountedPosts(%v) want total items %v, got %v", countResult, len(getPostResult), len(posts))
+	}
 	// no guarantee of map item order so iterating over both actual and expected
 	// and assigning values in the same map order for both expected and actual
 	for _, actual := range posts {
-		for _, article := range mockPostResult {
+		for _, article := range getPostResult {
 			if actual == article {
 				actualProcessed = actual
 				expectedProcessed = article
 				break
 			}
 		}
-		assert.Equal(t, actualProcessed, expectedProcessed, "Map input values should be the same as the returned slice values")
+
+		if !cmp.Equal(expectedProcessed, actualProcessed) {
+			t.Errorf("Expected processed article %v, got %v ", expectedProcessed, actualProcessed)
+		}
 	}
 }
