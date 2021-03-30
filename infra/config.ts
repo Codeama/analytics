@@ -1,9 +1,16 @@
+/**
+ * Thi
+ * @param envName - NAMESPACE that has been set
+ * @returns WebSocket client URL that has been set
+ */
 const domainConfig = (envName: string) => {
   switch (envName) {
     case 'prod':
-      return 'https://bukola.info';
+      return process.env.PROD_CLIENT_URL as string;
     case 'stage':
-      return 'https://staging.bukola.info';
+      return process.env.STAGING_CLIENT_URL as string;
+    case 'dev':
+      return process.env.LOCAL_CLIENT_URL as string;
     default:
       return 'http://localhost:8000';
   }

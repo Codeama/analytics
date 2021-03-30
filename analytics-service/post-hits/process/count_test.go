@@ -95,7 +95,7 @@ func TestCountViews(t *testing.T) {
 	}
 
 	if !cmp.Equal(got, countResult) {
-		t.Errorf("CountViews(%v) want %v got %v", inputEvent, countResult, got)
+		t.Errorf(cmp.Diff(countResult, got))
 	}
 }
 
@@ -119,7 +119,7 @@ func TestGetPosts(t *testing.T) {
 		}
 
 		if !cmp.Equal(expectedProcessed, actualProcessed) {
-			t.Errorf("Expected processed article %v, got %v ", expectedProcessed, actualProcessed)
+			t.Errorf(cmp.Diff(expectedProcessed, actualProcessed))
 		}
 	}
 }
