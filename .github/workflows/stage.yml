@@ -50,11 +50,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-1
 
-      - name: "Deploy CDK app"
+      - name: "Deploy CDK app to staging environment"
+        env:
+          CLIENT_URL: ${{ secrets.STAGING_CLIENT }}
         run: |
           cd infra
           npm install
           cd -
+          export STAGING_CLIENT_URL=$CLIENT_URL
           export NAMESPACE=stage
           chmod +x ./deploy.sh
           ./deploy.sh

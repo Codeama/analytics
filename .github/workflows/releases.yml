@@ -49,10 +49,13 @@ jobs:
           aws-region: eu-west-1
 
       - name: "Deploy CDK app"
+        env:
+          CLIENT_URL: ${{ secrets.PROD_CLIENT }}
         run: |
           cd infra
           npm install
           cd -
+          export PROD_CLIENT_URL=$CLIENT_URL
           export NAMESPACE=prod
           chmod +x ./deploy.sh
           ./deploy.sh
