@@ -1,5 +1,17 @@
 ![Build and Deploy](https://github.com/Codeama/analytics/workflows/Build%20and%20Deploy/badge.svg)
 
+## Contents
+
+[1. What](#What)  
+[2. Why](#Why)  
+[3. How it Works](#How-it-Works)  
+[4. Client to Server](#Client-to-Server)  
+[5. WebSocket Client](#WebSocket-Client)  
+[6. Tech Stack](#Tech-Stack)  
+[7. Infrastructure](#Infrastructure)  
+[8. Data Storage](#Data-Storage)  
+[9. Deploying a Stack](Deploying-a-Stack)
+
 ## What
 
 Near real-time event-driven analytics server for my blog site.
@@ -16,11 +28,13 @@ This project is also a way for me to practise my Go programming skills by buildi
 
 ### How it Works
 
+Architectural diagram can be found [here](docs/analytics-resources-diagram.png).
+
 The server counts the total hit on a page and determines unique views based on the value of `refreshed` as false sent by the client. If this is not supplied, unique views will be calculated the same way as total views. It is up to the client to decide whether a page is refreshed or not to be counted as non-unique.
 
 The WebSocket server also sends back the total views for each article or blog. This can be added to blog pages. (_I haven't added to mine, it requires CSS_ >.< lol\_).
 
-### Client Data to Server
+### Client to Server
 
 The following is the JSON data expected by the server:
 
