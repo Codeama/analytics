@@ -1,12 +1,14 @@
 /**This lambda construct reads
  * from DynamoDB stream and writes to a new table
  */
+import { Duration } from 'aws-cdk-lib';
+import { Table } from 'aws-cdk-lib/aws-dynamodb';
+import { Runtime, Code, StartingPosition, Function } from 'aws-cdk-lib/aws-lambda';
+import { DynamoEventSource, SqsDlq } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
+import { Construct } from 'constructs';
 import * as path from 'path';
-import { Construct, Duration, Fn } from '@aws-cdk/core';
-import { Code, Function, Runtime, StartingPosition } from '@aws-cdk/aws-lambda';
-import { DynamoEventSource, SqsDlq } from '@aws-cdk/aws-lambda-event-sources';
-import { Table } from '@aws-cdk/aws-dynamodb';
-import { Queue } from '@aws-cdk/aws-sqs';
+
 
 interface StreamProps {
   lambdaDir: string;

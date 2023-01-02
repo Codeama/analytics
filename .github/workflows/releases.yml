@@ -1,8 +1,8 @@
-name: (master) Build and deploy
+name: (main) Build and deploy
 
 on:
   release:
-    branches: [master]
+    branches: [main]
     types: [published]
 jobs:
   Build_and_Deploy_CDK_App:
@@ -37,7 +37,7 @@ jobs:
 
       - name: "Run CDK infrastructure test"
         run: |
-          cd infra
+          cd cloud_resources
           npm i
           npm run build && npm test
 
@@ -52,7 +52,7 @@ jobs:
         env:
           CLIENT_URL: ${{ secrets.PROD_CLIENT }}
         run: |
-          cd infra
+          cd cloud_resources
           npm install
           cd -
           export PROD_CLIENT_URL=$CLIENT_URL

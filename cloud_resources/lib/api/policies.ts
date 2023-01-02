@@ -1,4 +1,4 @@
-import { PolicyStatement, Effect } from '@aws-cdk/aws-iam';
+import { PolicyStatement, Effect } from "aws-cdk-lib/aws-iam";
 
 export const lambdaPolicy = (lambdasArn: string[]) => {
   return new PolicyStatement({

@@ -1,5 +1,4 @@
 /**
- * Thi
  * @param envName - NAMESPACE that has been set
  * @returns WebSocket client URL that has been set
  */
@@ -24,3 +23,9 @@ export const config = {
   REFERRER_TABLE: process.env.NAMESPACE + 'Referrer',
   DOMAIN_NAME: domainConfig(process.env.NAMESPACE!),
 };
+
+export const validate = () =>{
+  if (!process.env.NAMESPACE) {
+    throw Error("NAMESPACE environment variable is required.")
+  }
+}

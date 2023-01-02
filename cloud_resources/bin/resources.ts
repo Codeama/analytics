@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
-import * as cdk from '@aws-cdk/core';
+import * as cdk from 'aws-cdk-lib';
 import { ApiStack } from '../lib/api/api-stack';
 import { DatabaseStack } from '../lib/data-store/dynamodb-stack';
+import { validate } from '../config';
 
-if (!process.env.NAMESPACE) {
-  throw Error('NAMESPACE environment must be set.');
-}
+validate()
 
 const protect = process.env.NAMESPACE === 'prod' ? true : false;
 

@@ -1,20 +1,19 @@
-import {
-  Construct,
-  ConcreteDependable,
-  StackProps,
-  Stack,
-} from '@aws-cdk/core';
-import { ManagedPolicy, Role, ServicePrincipal } from '@aws-cdk/aws-iam';
-import { CfnApi, CfnDeployment, CfnStage } from '@aws-cdk/aws-apigatewayv2';
-import { Topic } from '@aws-cdk/aws-sns';
+
 import { Default } from './routes/default';
 import { Views } from './routes/views';
 import { lambdaPolicy } from './policies';
 import { HitsHandler } from './subscriber';
 import { config } from '../../config';
-import { LogGroup, RetentionDays } from '@aws-cdk/aws-logs';
-import { CfnAccount } from '@aws-cdk/aws-apigateway';
+
 import { Connection } from './routes/connect';
+import { StackProps, Stack } from 'aws-cdk-lib';
+import {CfnDeployment, CfnStage } from 'aws-cdk-lib/aws-apigatewayv2';
+import { CfnApi } from 'aws-cdk-lib/aws-apigatewayv2';
+import { Role, ServicePrincipal, ManagedPolicy } from 'aws-cdk-lib/aws-iam';
+import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { Topic } from 'aws-cdk-lib/aws-sns';
+import { Construct } from 'constructs';
+import { CfnAccount } from 'aws-cdk-lib/aws-apigateway';
 
 export interface ApiProps extends StackProps {
   namespace: string;
@@ -128,10 +127,10 @@ export class ApiStack extends Stack {
       },
     });
 
-    const dependencies = new ConcreteDependable();
-    dependencies.add(this.viewsRouteKey.route);
-    dependencies.add(this.defaultRouteKey.route);
-    deployment.node.addDependency(dependencies);
+    // const dependencies = new ConcreteDependable();
+    // dependencies.add(this.viewsRouteKey.route);
+    // dependencies.add(this.defaultRouteKey.route);
+    // deployment.node.addDependency(dependencies);
   };
 
   createHitHandlers = () => {

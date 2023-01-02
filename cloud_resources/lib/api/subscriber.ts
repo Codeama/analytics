@@ -1,10 +1,11 @@
+import { Duration, Fn } from 'aws-cdk-lib';
+import { Runtime, Code, Function } from 'aws-cdk-lib/aws-lambda';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { SubscriptionFilter, Topic } from 'aws-cdk-lib/aws-sns';
+import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
+import { Construct } from 'constructs';
 import * as path from 'path';
-import { Function, Runtime, Code } from '@aws-cdk/aws-lambda';
-import { Topic, SubscriptionFilter } from '@aws-cdk/aws-sns';
-import { Queue } from '@aws-cdk/aws-sqs';
-import { SqsSubscription } from '@aws-cdk/aws-sns-subscriptions';
-import { SqsEventSource } from '@aws-cdk/aws-lambda-event-sources';
-import { Construct, Duration, Fn } from '@aws-cdk/core';
 import { ReadWriteDynamoDBTable } from './policies';
 
 interface HandlerProps {
@@ -75,7 +76,7 @@ export class HitsHandler extends Construct {
     return new SqsSubscription(this.queue, {
       filterPolicy: {
         event_type: SubscriptionFilter.stringFilter({
-          whitelist: eventTypes,
+          allowlist: eventTypes,
         }),
       },
       rawMessageDelivery: true,

@@ -8,7 +8,7 @@
 [4. Client to Server](#Client-to-Server)  
 [5. WebSocket Client](#WebSocket-Client)  
 [6. Tech Stack](#Tech-Stack)  
-[7. Infrastructure](#Infrastructure)  
+[7. Cloud Resources](#Cloud Resources)  
 [8. Data Storage](#Data-Storage)  
 [9. Deploying a Stack](Deploying-a-Stack)
 
@@ -58,9 +58,9 @@ You can use any WebSocket client but ultimately, the tracking/tagging is up to y
 - NodeJS/TypeScript & AWS CDK: for Infrastructure as Code
 - SNS, SQS, DynamoDB, DynamoDB Streams and API Gateway WebSockets
 
-### Infrastructure
+### Cloud Resources
 
-The `infra` directory contains the CDK app for the resources that constitute the entire infrastructure of the project on AWS.
+The `cloud_resources` directory contains the CDK app for the resources that constitute the entire infrastructure of the project on AWS.
 The resources include: API Gateway (Websocket), Lambda functions, SQS, SNS and DynamoDB.
 The API Gateway resources are backed by Lambda functions that process incoming requests via a websocket and publish them to SNS.
 SNS is subscribed to by a number of SQS queues that receive notifications based on specific filters: `post_views`, `profile_views` and so on.
@@ -68,7 +68,7 @@ Each SQS queue has a corresponding Lambda function which processes messages from
 
 ### Data Storage
 
-The app infrastructure contains four DynamoDB tables:
+The application cloud-hosted data storage consist of four DynamoDB tables:
 
 - HomeAndProfile: stores hit counts of my blog homepage and contacts page
 - PostCountWriter: stores hit counts of my blog posts and is listened to by a DynamoDB stream
@@ -87,7 +87,7 @@ The app infrastructure contains four DynamoDB tables:
 ### Environment variables
 
 - Set your AWS profile using the AWS CLI
-- Choose your stack namespace. Allowed namespaces are: `prod`, `stage` or `local`. The namespace you set will map to the client domain that can talk to the analytics server on AWS. The client url is yours to decide. Mine is currently my blog site and so I use `prod` to deploy and set a prod client for `PROD_CLIENT_URL`. `dev` is ideal for deploying and testing locally. A list of enviroment variables to set can be found in `infra/env.template`
+- Choose your stack namespace. Allowed namespaces are: `prod`, `stage` or `local`. The namespace you set will map to the client domain that can talk to the analytics server on AWS. The client url is yours to decide. Mine is currently my blog site and so I use `prod` to deploy and set a prod client for `PROD_CLIENT_URL`. `dev` is ideal for deploying and testing locally. A list of enviroment variables to set can be found in `cloud_resources/env.template`
 
 ### Build, Package and Deploy
 

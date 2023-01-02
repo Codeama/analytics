@@ -1,14 +1,11 @@
+import { CfnRefElement, Fn } from 'aws-cdk-lib';
+import { CfnIntegration, CfnRouteResponse, CfnIntegrationResponse, CfnRoute } from 'aws-cdk-lib/aws-apigatewayv2';
+import { Role, ManagedPolicy } from 'aws-cdk-lib/aws-iam';
+import { Runtime, Code, Function } from 'aws-cdk-lib/aws-lambda';
+import { Topic } from 'aws-cdk-lib/aws-sns';
+import { Construct } from 'constructs';
 import * as path from 'path';
-import { Function, Runtime, Code } from '@aws-cdk/aws-lambda';
-import { Construct, CfnRefElement, Fn } from '@aws-cdk/core';
-import {
-  CfnIntegration,
-  CfnRoute,
-  CfnRouteResponse,
-  CfnIntegrationResponse,
-} from '@aws-cdk/aws-apigatewayv2';
-import { ManagedPolicy, Role } from '@aws-cdk/aws-iam';
-import { Topic } from '@aws-cdk/aws-sns';
+
 import { config } from '../../../config';
 import { ReadWriteDynamoDBTable } from '../policies';
 

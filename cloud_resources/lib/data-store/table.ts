@@ -1,6 +1,8 @@
-import { CfnOutput, Construct } from '@aws-cdk/core';
-import { Table, AttributeType, StreamViewType } from '@aws-cdk/aws-dynamodb';
-import { Function } from '@aws-cdk/aws-lambda';
+import { CfnOutput } from "aws-cdk-lib";
+import { StreamViewType, Table, AttributeType } from "aws-cdk-lib/aws-dynamodb";
+import { Construct } from "constructs";
+import { Function } from "aws-cdk-lib/aws-lambda";
+
 
 interface StoreProps {
   indexName: string;

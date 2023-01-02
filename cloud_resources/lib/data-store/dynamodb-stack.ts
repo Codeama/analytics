@@ -1,5 +1,7 @@
-import { StreamViewType } from '@aws-cdk/aws-dynamodb';
-import { Stack, Construct, StackProps } from '@aws-cdk/core';
+
+import { StackProps, Stack } from 'aws-cdk-lib';
+import { StreamViewType } from 'aws-cdk-lib/aws-dynamodb';
+import { Construct } from 'constructs';
 import { config } from '../../config';
 import { StreamHandler } from './db-stream-lambda';
 import { Store } from './table';
