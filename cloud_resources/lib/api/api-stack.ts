@@ -127,10 +127,8 @@ export class ApiStack extends Stack {
       },
     });
 
-    // const dependencies = new ConcreteDependable();
-    // dependencies.add(this.viewsRouteKey.route);
-    // dependencies.add(this.defaultRouteKey.route);
-    // deployment.node.addDependency(dependencies);
+    deployment.node.addDependency(this.viewsRouteKey.route);
+    deployment.node.addDependency(this.defaultRouteKey.route)
   };
 
   createHitHandlers = () => {

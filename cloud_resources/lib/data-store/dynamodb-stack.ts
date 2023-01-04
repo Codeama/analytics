@@ -11,7 +11,6 @@ export interface DatabaseProps extends StackProps {
 }
 
 export class DatabaseStack extends Stack {
-  private streamHandler: StreamHandler;
   private namespace: string;
 
   constructor(scope: Construct, id: string, props: DatabaseProps) {
@@ -29,7 +28,7 @@ export class DatabaseStack extends Stack {
       stream: StreamViewType.NEW_IMAGE,
     });
 
-    this.streamHandler = new StreamHandler(
+    const streamHandler = new StreamHandler(
       this,
       this.namespace + 'StreamLambda',
       {
@@ -40,10 +39,11 @@ export class DatabaseStack extends Stack {
       }
     );
 
+
     const postReaderTable = new Store(this, this.namespace + 'ReaderTable', {
       tableName: config.POST_TABLE_READER,
       indexName: 'articleId',
-      lambdaGrantee: this.streamHandler.lambda, // grant streamHandler permission to write to this table
+      lambdaGrantee: streamHandler.lambda, // grant streamHandler permission to write to this table
     });
 
     const homeAndProfileTable = new Store(
