@@ -25,7 +25,7 @@ export class Connection extends Construct {
       code: Code.fromAsset(
         path.join(
           __dirname,
-          '../../../../analytics-service/connect/dist/main.zip'
+          '../../../../services/connect/dist/main.zip'
         )
       ),
       handler: 'main',

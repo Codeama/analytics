@@ -24,7 +24,7 @@ export class Default extends Construct {
       code: Code.fromAsset(
         path.join(
           __dirname,
-          '../../../../analytics-service/default-stream/dist/main.zip'
+          '../../../../services/default_route/dist/main.zip'
         )
       ),
       handler: 'main',

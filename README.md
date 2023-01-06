@@ -8,19 +8,19 @@
 [4. Client to Server](#Client-to-Server)  
 [5. WebSocket Client](#WebSocket-Client)  
 [6. Tech Stack](#Tech-Stack)  
-[7. Cloud Resources](#Cloud Resources)  
+[7. Cloud Resources](#Cloud-Resources)  
 [8. Data Storage](#Data-Storage)  
-[9. Deploying a Stack](Deploying-a-Stack)
+[9. Deploying a Stack](Deploying-a-Stack) 
 
-## What
+## What 
 
 Near real-time event-driven analytics server for my blog site.
 
 ## Why
 
-- For the love of data :blush:
-- Reader privacy - tracks views not users
-- It's fun!
+- For the love of data :blush: 
+- Reader privacy - tracks views not users 
+- It's fun! 
 
 ### More About _Why_
 

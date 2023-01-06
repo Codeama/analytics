@@ -33,7 +33,7 @@ export class Views extends Construct {
       code: Code.fromAsset(
         path.join(
           __dirname,
-          '../../../../analytics-service/views-stream/dist/main.zip'
+          '../../../../services/views/dist/main.zip'
         )
       ),
       handler: 'main',

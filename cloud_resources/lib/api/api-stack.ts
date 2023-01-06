@@ -135,7 +135,7 @@ export class ApiStack extends Stack {
     // HOME
     this.homeHitsHandler = new HitsHandler(this, this.namespace + 'homepage', {
       name: this.namespace + 'homeQueueFunc',
-      lambdaDir: '../../../analytics-service/home-hits/dist/main.zip',
+      lambdaDir: '../../../services/home/dist/main.zip',
       topic: this.snsTopic,
       tableName: config.HOME_AND_PROFILE,
       region: config.AWS_REGION as string,
@@ -150,7 +150,7 @@ export class ApiStack extends Stack {
     // POST
     this.postHitsHandler = new HitsHandler(this, this.namespace + 'post', {
       name: this.namespace + 'postQueueFunc',
-      lambdaDir: '../../../analytics-service/post-hits/dist/main.zip',
+      lambdaDir: '../../../services/posts/dist/main.zip',
       topic: this.snsTopic,
       tableName: config.POST_TABLE_WRITER,
       region: config.AWS_REGION as string,
@@ -168,7 +168,7 @@ export class ApiStack extends Stack {
       this.namespace + 'profile',
       {
         name: this.namespace + 'profileQueueFunc',
-        lambdaDir: '../../../analytics-service/profile-hits/dist/main.zip',
+        lambdaDir: '../../../services/profile/dist/main.zip',
         topic: this.snsTopic,
         region: config.AWS_REGION as string,
         tableName: config.HOME_AND_PROFILE,

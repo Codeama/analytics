@@ -32,7 +32,7 @@ export class DatabaseStack extends Stack {
       this,
       this.namespace + 'StreamLambda',
       {
-        lambdaDir: './../../../analytics-service/dynamo-stream/dist/main.zip',
+        lambdaDir: './../../../services/copy/dist/main.zip',
         tableName: config.POST_TABLE_READER,
         region: config.AWS_REGION as string,
         triggerSource: postWriterTable.table,
